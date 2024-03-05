@@ -1,6 +1,7 @@
 import { Texture, getTexture, loadTexture } from "./assets/texture"
 import { transitionAiState, updateCharacterAi } from "./entities/character"
-import { Character, Entity, EntityType, GridSize, MapSize, Resource, fillData, setMoveTo } from "./entities/entity"
+import { Character, Entity, EntityType, GridSize, MapSize, fillData, setMoveTo } from "./entities/entity"
+import { updateResourceSpawns } from "./resources"
 import { getState, updateState } from "./state"
 import "./style.css"
 import "./ui/action-view"
@@ -98,24 +99,6 @@ function addTown(gridX: number, gridY: number) {
     addEntity(EntityType.Town, getTexture("town"), gridX, gridY, 2, 2)
 }
 
-function addForest(gridX: number, gridY: number) {
-    const { entities } = getState()
-
-    const forest: Resource = {
-        id: entities.length + 1,
-        texture: getTexture("forest"),
-        type: EntityType.Resource,
-        x: gridX * GridSize,
-        y: gridY * GridSize,
-        itemId: "wood",
-        amount: 1,
-        subscribers: [],
-    }
-
-    fillData(forest, gridX, gridY, 1, 1)
-    entities.push(forest)
-}
-
 function addCharacter(gridX: number, gridY: number, isPlayer = false) {
     const character: Character = {
         id: characters.length + 1,
@@ -146,6 +129,9 @@ function load() {
     updateState({
         entities: [],
         data: new Uint16Array(MapSize * MapSize),
+        ecology: {
+            treesToSpawn: 20,
+        },
     })
 
     loadTexture("character", "/textures/character.png")
@@ -154,10 +140,8 @@ function load() {
     loadTexture("forest", "/textures/forest.png")
 
     addTown(24, 24)
-    addForest(10, 16)
-    addForest(18, 16)
-    // addForest(28, 26)
     addCharacter(16, 6)
+    addCharacter(36, 26)
 
     player = addCharacter(20, 20, true)
 
@@ -176,6 +160,8 @@ function loadUI() {
 
 function update() {
     const tCurr = Date.now()
+
+    updateResourceSpawns()
 
     for (const character of characters) {
         updateCharacterAi(character, tCurr)

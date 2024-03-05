@@ -78,7 +78,7 @@ export function setMoveTo(character: Character, targetX: number, targetY: number
     character.tActionEnd = character.tActionStart + (distance / character.speed) * 1000
 }
 
-export function findEntity(type: EntityType, x: number, y: number) {
+export function findEntity(type: EntityType, x: number, y: number, withoutSubscribers = false) {
     const { entities } = getState()
 
     let closestEntity: Entity | null = null
@@ -86,6 +86,9 @@ export function findEntity(type: EntityType, x: number, y: number) {
 
     for (const entity of entities) {
         if (entity.type !== type) {
+            continue
+        }
+        if (withoutSubscribers && entity.subscribers.length) {
             continue
         }
 
@@ -108,6 +111,15 @@ export function fillData(entity: Entity, gridX: number, gridY: number, sizeX: nu
             data[index] = entity.id
         }
     }
+}
+
+export function canPlaceEntity(gridX: number, gridY: number) {
+    const { data } = getState()
+
+    const index = gridX + gridY * MapSize
+    const entityId = data[index]
+
+    return !entityId
 }
 
 export function destroyEntity(entity: Entity) {

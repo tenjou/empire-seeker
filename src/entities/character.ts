@@ -40,7 +40,7 @@ export function updateCharacterAi(character: Character, tCurr: number) {
         }
 
         case "search-wood": {
-            const forest = findEntity(EntityType.Resource, character.x, character.y)
+            const forest = findEntity(EntityType.Resource, character.x, character.y, true)
             if (!forest) {
                 if (character.inventorySpace > 0) {
                     transitionAiState(character, "return-town")
@@ -122,7 +122,7 @@ export function updateCharacterAi(character: Character, tCurr: number) {
 function handleEntityEvent(_from: Entity, to: Entity, event: EntityEvent) {
     switch (event) {
         case "destroyed":
-            transitionAiState(to as Character, "idle")
+            transitionAiState(to as Character, "search-wood")
             break
     }
 }

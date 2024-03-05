@@ -4,6 +4,9 @@ interface GameState {
     entities: Entity[]
     data: Uint16Array
     player: Character
+    ecology: {
+        treesToSpawn: number
+    }
 }
 
 const emptyState: GameState = {} as GameState
