@@ -1,0 +1,136 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+:root {
+    font-family: "Open Sans", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    font-weight: 400;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+}
+
+#app {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+#ui {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.absolute {
+    position: absolute;
+}
+.left {
+    left: 0;
+}
+.right {
+    right: 0;
+}
+.bottom {
+    bottom: 0;
+}
+.center {
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.flex {
+    display: flex;
+}
+
+.bg-black-blended {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.color-white {
+    color: #fff;
+}
+.color-gray {
+    color: #ccc;
+}
+
+.font-smaller {
+    font-size: 0.9rem;
+}
+
+.bold {
+    font-weight: 600;
+}
+
+.p-2 {
+    padding: 0.5rem;
+}
+.px-2 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+.py-1 {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+.pb-1 {
+    padding-bottom: 0.25rem;
+}
+.pr-1 {
+    padding-right: 0.25rem;
+}
+
+.m-2 {
+    margin: 0.5rem;
+}
+.mb-1 {
+    margin-bottom: 0.25rem;
+}
+
+.width-160px {
+    width: 160px;
+}
+
+.height-60px {
+    height: 60px;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #4b4b4b;
+}
+
+.border-radius {
+    border-radius: 3px;
+}
+
+.button {
+    width: 100px;
+    height: 28px;
+    cursor: pointer;
+    border: 1px solid black;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    background: none;
+}
+.button:active,
+.clickable:active,
+.pressed {
+    transform: translateY(1px);
+}
