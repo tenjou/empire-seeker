@@ -21,6 +21,6 @@ export function showEntityTooltip(entity: Entity | null) {
         return
     }
 
-    tooltipElement.update(entity.type)
+    tooltipElement.update(entity)
     tooltipElement.classList.remove("hide")
 }

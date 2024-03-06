@@ -1,6 +1,7 @@
 import { getTexture } from "../assets/texture"
 import { addInventoryItem } from "../inventory"
 import { getState } from "../state"
+import { randomNumber } from "../utils"
 import { Character, Entity, EntityType, GridSize, Resource, addEntity, createEntityId, destroyEntity, fillData } from "./entity"
 
 const resourceEntityPool: Resource[] = []
@@ -40,7 +41,7 @@ export function addTree(gridX: number, gridY: number) {
         }
     }
 
-    tree.amount = 1
+    tree.amount = randomNumber(1, 3)
     tree.x = gridX * GridSize
     tree.y = gridY * GridSize
 

@@ -58,6 +58,9 @@ canvas {
 .flex {
     display: flex;
 }
+.column {
+    flex-direction: column;
+}
 
 .hide {
     display: none;
@@ -105,6 +108,12 @@ canvas {
 }
 .mb-1 {
     margin-bottom: 0.25rem;
+}
+.ml-1 {
+    margin-left: 0.25rem;
+}
+.ml-2 {
+    margin-left: 0.5rem;
 }
 
 .width-160px {
