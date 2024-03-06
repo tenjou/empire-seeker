@@ -13,6 +13,11 @@ template.innerHTML = html`
         population:
         <div id="population" class="ml-2 color-white"></div>
     </div>
+
+    <div class="flex">
+        stockpile:
+        <div id="stockpile" class="ml-2 color-white"></div>
+    </div>
 `
 
 export class TooltipVillageElement extends HTMLComponent {
@@ -27,6 +32,7 @@ export class TooltipVillageElement extends HTMLComponent {
     update(village: Village) {
         this.setText("#tier", village.tier)
         this.setText("#population", village.population)
+        this.setText("#stockpile", village.inventory.spaceUsed)
     }
 }
 

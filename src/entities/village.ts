@@ -1,5 +1,5 @@
 import { getTexture } from "../assets/texture"
-import { Inventory } from "../inventory"
+import { Inventory, addInventoryItem } from "../inventory"
 import { getState } from "../state"
 import { Entity, EntityType, GridSize, addEntity, createEntityId, fillData } from "./entity"
 
@@ -45,6 +45,8 @@ export function updateVillages() {
         if (entity.type !== EntityType.Village) {
             continue
         }
+
+        addInventoryItem(entity, (entity as Village).inventory, "grain", VillageProductionRate)
     }
 
     time.villageUpdate += VillageUpdateDelay

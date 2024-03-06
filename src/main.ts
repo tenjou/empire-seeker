@@ -1,7 +1,7 @@
 import { Texture, getTexture, loadTexture } from "./assets/texture"
 import { Character, transitionAiState, updateCharacterAi } from "./entities/character"
 import { Entity, EntityType, GridSize, MapSize, addEntity, createEntityId, fillData, getEntityAt, setMoveTo } from "./entities/entity"
-import { createVillage } from "./entities/village"
+import { createVillage, updateVillages } from "./entities/village"
 import { updateResourceSpawns } from "./resources"
 import { getState, loadState, updateState } from "./state"
 import "./style.css"
@@ -173,6 +173,7 @@ function update() {
     time.curr += tDelta
 
     updateResourceSpawns()
+    updateVillages()
 
     for (const character of characters) {
         updateCharacterAi(character, time.curr)
