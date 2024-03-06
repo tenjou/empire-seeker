@@ -2,7 +2,8 @@ import { getTexture } from "../assets/texture"
 import { addInventoryItem } from "../inventory"
 import { getState } from "../state"
 import { randomNumber } from "../utils"
-import { Character, Entity, EntityType, GridSize, Resource, addEntity, createEntityId, destroyEntity, emit, fillData } from "./entity"
+import { Character } from "./character"
+import { Entity, EntityType, GridSize, Resource, addEntity, createEntityId, destroyEntity, emit, fillData } from "./entity"
 
 const resourceEntityPool: Resource[] = []
 
@@ -15,7 +16,7 @@ export function extractResource(character: Character, entity: Entity | null) {
     resource.amount -= 1
     emit(resource, "state-updated")
 
-    addInventoryItem(character, resource.itemId, 1)
+    addInventoryItem(character, character.inventory, resource.itemId, 1)
 
     if (resource.amount <= 0) {
         const { ecology } = getState()

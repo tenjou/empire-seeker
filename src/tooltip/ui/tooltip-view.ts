@@ -1,7 +1,10 @@
 import { EmptyEntity, Entity, EntityType, Resource } from "../../entities/entity"
+import { Village } from "../../entities/village"
 import { HTMLComponent } from "../../ui/dom"
 import "./tooltip-resource"
 import { TooltipResourceElement } from "./tooltip-resource"
+import "./tooltip-village"
+import { TooltipVillageElement } from "./tooltip-village"
 
 const template = document.createElement("template")
 template.className = "absolute top left p-2 m-2 width-160px bg-black-blended border-radius color-white hide"
@@ -36,6 +39,11 @@ export class TooltipView extends HTMLComponent {
                 ;(content.children[0] as TooltipResourceElement).update(this.currEntity as Resource)
                 break
             }
+
+            case EntityType.Village: {
+                ;(content.children[0] as TooltipVillageElement).update(this.currEntity as Village)
+                break
+            }
         }
     }
 
@@ -49,6 +57,12 @@ export class TooltipView extends HTMLComponent {
             case EntityType.Resource: {
                 const tooltipResource = new TooltipResourceElement()
                 content.appendChild(tooltipResource)
+                break
+            }
+
+            case EntityType.Village: {
+                const tooltipVillage = new TooltipVillageElement()
+                content.appendChild(tooltipVillage)
                 break
             }
         }

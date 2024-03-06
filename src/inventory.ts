@@ -1,40 +1,44 @@
-import { Character, emit } from "./entities/entity"
+import { Entity, emit } from "./entities/entity"
 
-export type InventoryItemId = "wood"
+export type InventoryItemId = "wood" | "grain"
 
 export interface InventoryItem {
     itemId: InventoryItemId
     amount: number
 }
 
-export const MaxInventorySpace = 2
+export interface Inventory {
+    items: InventoryItem[]
+    spaceUsed: number
+    spaceMax: number
+}
 
-export function addInventoryItem(character: Character, itemId: InventoryItemId, amountAdd: number) {
-    const spaceLeft = MaxInventorySpace - character.inventorySpace
+export function addInventoryItem(entity: Entity, inventory: Inventory, itemId: InventoryItemId, amountAdd: number) {
+    const spaceLeft = inventory.spaceMax - inventory.spaceUsed
     const amount = Math.min(spaceLeft, amountAdd)
 
-    const item = character.inventory.find((entry) => entry.itemId === itemId)
+    const item = inventory.items.find((entry) => entry.itemId === itemId)
     if (item) {
         item.amount += amount
     } else {
-        character.inventory.push({
+        inventory.items.push({
             itemId,
             amount,
         })
     }
 
-    character.inventorySpace += amount
+    inventory.spaceUsed += amount
 
-    emit(character, "inventory-updated")
+    emit(entity, "inventory-updated")
 }
 
-export function sellInventory(character: Character) {
-    character.inventory.length = 0
-    character.inventorySpace = 0
+export function sellInventory(inventory: Inventory) {
+    inventory.items.length = 0
+    inventory.spaceUsed = 0
 }
 
-export function haveInventorySpace(character: Character, amount: number) {
-    const spaceLeft = MaxInventorySpace - character.inventorySpace
+export function haveInventorySpace(inventory: Inventory, amount: number) {
+    const spaceLeft = inventory.spaceMax - inventory.spaceUsed
 
     return spaceLeft >= amount
 }

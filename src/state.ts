@@ -1,4 +1,5 @@
-import { Character, Entity } from "./entities/entity"
+import { Character } from "./entities/character"
+import { Entity } from "./entities/entity"
 
 interface GameState {
     entities: Entity[]
@@ -7,6 +8,10 @@ interface GameState {
     player: Character
     ecology: {
         treesToSpawn: number
+    }
+    time: {
+        curr: number
+        villageUpdate: number
     }
 }
 

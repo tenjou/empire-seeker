@@ -1,5 +1,4 @@
 import { EmptyEntity, subscribe } from "../entities/entity"
-import { MaxInventorySpace } from "../inventory"
 import { getState } from "../state"
 import { HTMLComponent } from "./dom"
 import "./inventory-item"
@@ -13,7 +12,7 @@ template.innerHTML = html`
     <div id="items" class="height-60px">
         <inventory-item></inventory-item>
     </div>
-    <div id="space">0 / 2</div>
+    <div id="space"></div>
 `
 
 export class InventoryView extends HTMLComponent {
@@ -34,16 +33,18 @@ export class InventoryView extends HTMLComponent {
     update() {
         const { player } = getState()
 
-        const container = this.getElement("#items")
-        this.syncElementEntries("inventory-item", player.inventory.length, container)
+        const inventory = player.inventory
 
-        for (let n = 0; n < player.inventory.length; n += 1) {
-            const item = player.inventory[n]
+        const container = this.getElement("#items")
+        this.syncElementEntries("inventory-item", inventory.items.length, container)
+
+        for (let n = 0; n < inventory.items.length; n += 1) {
+            const item = inventory.items[n]
             const element = container.children[n] as InventoryItemElement
             element.update(item)
         }
 
-        this.setText("#space", `${player.inventorySpace} / ${MaxInventorySpace}`)
+        this.setText("#space", `${inventory.spaceUsed} / ${inventory.spaceMax}`)
     }
 }
 

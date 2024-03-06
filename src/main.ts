@@ -1,19 +1,9 @@
 import { Texture, getTexture, loadTexture } from "./assets/texture"
-import { transitionAiState, updateCharacterAi } from "./entities/character"
-import {
-    Character,
-    Entity,
-    EntityType,
-    GridSize,
-    MapSize,
-    addEntity,
-    createEntityId,
-    fillData,
-    getEntityAt,
-    setMoveTo,
-} from "./entities/entity"
+import { Character, transitionAiState, updateCharacterAi } from "./entities/character"
+import { Entity, EntityType, GridSize, MapSize, addEntity, createEntityId, fillData, getEntityAt, setMoveTo } from "./entities/entity"
+import { createVillage } from "./entities/village"
 import { updateResourceSpawns } from "./resources"
-import { getState, updateState } from "./state"
+import { getState, loadState, updateState } from "./state"
 import "./style.css"
 import { loadTooltip, showEntityTooltip as updateEntityTooltip } from "./tooltip/tooltip"
 import "./ui/action-view"
@@ -48,6 +38,7 @@ const camera: Camera = {
 
 const characters: Character[] = []
 
+let tPrev = 0
 let player: Character = {} as Character
 let hoverEntity: Entity | null = null
 let isHolding = false
@@ -130,23 +121,30 @@ function setup() {
 }
 
 function load() {
-    updateState({
+    loadState({
+        player: {} as Character,
         entities: [],
         entitiesMap: {},
         data: new Uint16Array(MapSize * MapSize),
         ecology: {
             treesToSpawn: 30,
         },
+        time: {
+            curr: 0,
+            villageUpdate: 0,
+        },
     })
 
     loadTexture("character", "/textures/character.png")
     loadTexture("player", "/textures/player.png")
     loadTexture("town", "/textures/town.png")
+    loadTexture("village", "/textures/village.png")
     loadTexture("forest", "/textures/forest.png")
 
     addTown(24, 24)
     addCharacter(16, 6)
     addCharacter(36, 26)
+    createVillage(30, 30)
 
     player = addCharacter(20, 20, true)
 
@@ -155,6 +153,8 @@ function load() {
     })
 
     loadUI()
+
+    tPrev = Date.now()
 }
 
 function loadUI() {
@@ -166,13 +166,19 @@ function loadUI() {
 }
 
 function update() {
+    const { time } = getState()
+
     const tCurr = Date.now()
+    const tDelta = tCurr - tPrev
+    time.curr += tDelta
 
     updateResourceSpawns()
 
     for (const character of characters) {
-        updateCharacterAi(character, tCurr)
+        updateCharacterAi(character, time.curr)
     }
+
+    tPrev = tCurr
 }
 
 function render() {
@@ -251,8 +257,11 @@ function addCharacter(gridX: number, gridY: number, isPlayer = false) {
         target: null,
         state: "idle",
         subscribers: [],
-        inventory: [],
-        inventorySpace: 0,
+        inventory: {
+            items: [],
+            spaceMax: 2,
+            spaceUsed: 0,
+        },
     }
 
     characters.push(character)

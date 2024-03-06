@@ -1,6 +1,21 @@
-import { haveInventorySpace, sellInventory } from "../inventory"
-import { AiState, Character, Entity, EntityEvent, EntityType, emit, findEntity, setMoveTo, subscribe, unsubscribe } from "./entity"
+import { Inventory, haveInventorySpace, sellInventory } from "../inventory"
+import { Entity, EntityEvent, EntityType, emit, findEntity, setMoveTo, subscribe, unsubscribe } from "./entity"
 import { extractResource } from "./resource"
+
+export type AiState = "idle" | "move-to-target" | "search-wood" | "gather-resource" | "return-town" | "sell"
+
+export interface Character extends Entity {
+    startX: number
+    startY: number
+    endX: number
+    endY: number
+    target: Entity | null
+    tActionStart: number
+    tActionEnd: number
+    speed: number
+    state: AiState
+    inventory: Inventory
+}
 
 export function transitionAiState(character: Character, newState: AiState, target: Entity | null = null) {
     if (character.state === newState && character.target === target) {
@@ -42,7 +57,7 @@ export function updateCharacterAi(character: Character, tCurr: number) {
         case "search-wood": {
             const forest = findEntity(EntityType.Resource, character.x, character.y, true)
             if (!forest) {
-                if (character.inventorySpace > 0) {
+                if (character.inventory.spaceUsed > 0) {
                     transitionAiState(character, "return-town")
                 } else {
                     transitionAiState(character, "idle")
@@ -68,6 +83,10 @@ export function updateCharacterAi(character: Character, tCurr: number) {
                         case EntityType.Town:
                             transitionAiState(character, "sell")
                             return
+
+                        default:
+                            transitionAiState(character, "idle")
+                            return
                     }
                 } else {
                     transitionAiState(character, "idle")
@@ -92,7 +111,7 @@ export function updateCharacterAi(character: Character, tCurr: number) {
 
                 extractResource(character, character.target)
 
-                if (!haveInventorySpace(character, 1)) {
+                if (!haveInventorySpace(character.inventory, 1)) {
                     transitionAiState(character, "return-town")
                 }
             }
@@ -112,7 +131,7 @@ export function updateCharacterAi(character: Character, tCurr: number) {
         }
 
         case "sell": {
-            sellInventory(character)
+            sellInventory(character.inventory)
             transitionAiState(character, "search-wood")
             break
         }

@@ -1,13 +1,15 @@
 import { Texture } from "../assets/texture"
-import { InventoryItem, InventoryItemId } from "../inventory"
+import { InventoryItemId } from "../inventory"
 import { getState } from "../state"
+import { Character } from "./character"
 
 export enum EntityType {
     Placeholder = 0,
     Player,
     Npc,
-    Town,
     Resource,
+    Village,
+    Town,
 }
 
 export type EntityEvent = "destroyed" | "inventory-updated" | "state-updated"
@@ -34,22 +36,6 @@ export interface Resource extends Entity {
     amount: number
 }
 
-export type AiState = "idle" | "move-to-target" | "search-wood" | "gather-resource" | "return-town" | "sell"
-
-export interface Character extends Entity {
-    startX: number
-    startY: number
-    endX: number
-    endY: number
-    target: Entity | null
-    tActionStart: number
-    tActionEnd: number
-    speed: number
-    state: AiState
-    inventory: InventoryItem[]
-    inventorySpace: number
-}
-
 export const GridSize = 16
 export const MapSize = 128
 
@@ -67,7 +53,13 @@ export const EmptyEntity: Entity = {
     y: 0,
 }
 
+export function createEntityId() {
+    return NextEntityId++
+}
+
 export function setMoveTo(character: Character, targetX: number, targetY: number) {
+    const { time } = getState()
+
     const diffX = character.x - targetX
     const diffY = character.y - targetY
     const distance = Math.sqrt(diffX * diffX + diffY * diffY) | 0
@@ -76,7 +68,7 @@ export function setMoveTo(character: Character, targetX: number, targetY: number
     character.startY = character.y
     character.endX = targetX
     character.endY = targetY
-    character.tActionStart = Date.now()
+    character.tActionStart = time.curr
     character.tActionEnd = character.tActionStart + (distance / character.speed) * 1000
 }
 
@@ -189,10 +181,6 @@ export function emit(from: Entity, event: EntityEvent) {
         const subscriber = from.subscribers[n]
         subscriber.callback(from, subscriber.entity, event)
     }
-}
-
-export function createEntityId() {
-    return NextEntityId++
 }
 
 export function getEntityAt(gridX: number, gridY: number): Entity | null {
