@@ -15,6 +15,7 @@ import {
 import { updateResourceSpawns } from "./resources"
 import { getState, updateState } from "./state"
 import "./style.css"
+import { loadTooltip, showEntityTooltip as updateEntityTooltip } from "./tooltip/tooltip"
 import "./ui/action-view"
 import { ActionView } from "./ui/action-view"
 import "./ui/commands-view"
@@ -41,7 +42,7 @@ const app: Context = {
 }
 
 const camera: Camera = {
-    x: 100,
+    x: 0,
     y: 0,
 }
 
@@ -116,6 +117,7 @@ function setup() {
         const gridY = (posY / GridSize) | 0
 
         hoverEntity = getEntityAt(gridX, gridY)
+        updateEntityTooltip(hoverEntity)
 
         document.body.style.cursor = hoverEntity ? "pointer" : "auto"
     })
@@ -159,6 +161,8 @@ function loadUI() {
     const parent = document.getElementById("ui")!
     parent.appendChild(new InventoryView())
     parent.appendChild(new ActionView())
+
+    loadTooltip()
 }
 
 function update() {

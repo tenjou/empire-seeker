@@ -1,5 +1,3 @@
-import { EventCallbackFunc, EventCallbackInfo, EventType, subscribeApp, unsubscribeApp } from "../events"
-
 export function getElementById(id: string, parent?: Element) {
     const element = parent ? parent.querySelector(`#${id}`) : document.getElementById(id)
     if (!element) {
@@ -122,7 +120,6 @@ export const scrollBottom = (element: HTMLElement) => {
 export class HTMLComponent extends HTMLElement {
     root: HTMLElement
     rootClasses: string
-    subscribers?: EventCallbackInfo[]
     timer?: number
     timeout?: number
 
@@ -151,13 +148,6 @@ export class HTMLComponent extends HTMLElement {
     }
 
     disconnectedCallback() {
-        if (this.subscribers) {
-            for (const subscriber of this.subscribers) {
-                unsubscribeApp(subscriber.type, subscriber.callback)
-            }
-            this.subscribers = undefined
-        }
-
         if (this.timer) {
             clearInterval(this.timer)
         }
@@ -247,19 +237,6 @@ export class HTMLComponent extends HTMLElement {
 
     haveAttribute(key: string) {
         return this.getAttribute(key) !== null
-    }
-
-    subscribe(type: EventType, callback: EventCallbackFunc) {
-        if (!this.subscribers) {
-            this.subscribers = []
-        }
-
-        subscribeApp(type, callback)
-
-        this.subscribers.push({
-            type,
-            callback,
-        })
     }
 
     setInterval(func: () => void, tInterval: number) {

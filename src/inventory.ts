@@ -1,5 +1,4 @@
 import { Character, emit } from "./entities/entity"
-import { emitApp } from "./events"
 
 export type InventoryItemId = "wood"
 
@@ -32,8 +31,6 @@ export function addInventoryItem(character: Character, itemId: InventoryItemId, 
 export function sellInventory(character: Character) {
     character.inventory.length = 0
     character.inventorySpace = 0
-
-    emitApp("inventory-updated")
 }
 
 export function haveInventorySpace(character: Character, amount: number) {
