@@ -2,7 +2,7 @@ import { getTexture } from "../assets/texture"
 import { addInventoryItem } from "../inventory"
 import { getState } from "../state"
 import { randomNumber } from "../utils"
-import { Character, Entity, EntityType, GridSize, Resource, addEntity, createEntityId, destroyEntity, fillData } from "./entity"
+import { Character, Entity, EntityType, GridSize, Resource, addEntity, createEntityId, destroyEntity, emit, fillData } from "./entity"
 
 const resourceEntityPool: Resource[] = []
 
@@ -13,6 +13,7 @@ export function extractResource(character: Character, entity: Entity | null) {
 
     const resource = entity as Resource
     resource.amount -= 1
+    emit(resource, "state-updated")
 
     addInventoryItem(character, resource.itemId, 1)
 
