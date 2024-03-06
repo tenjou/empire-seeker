@@ -28,6 +28,11 @@ interface Context {
     height: number
 }
 
+interface Camera {
+    x: number
+    y: number
+}
+
 const app: Context = {
     canvas: {} as HTMLCanvasElement,
     ctx: {} as CanvasRenderingContext2D,
@@ -35,10 +40,17 @@ const app: Context = {
     height: 0,
 }
 
+const camera: Camera = {
+    x: 100,
+    y: 0,
+}
+
 const characters: Character[] = []
 
 let player: Character = {} as Character
 let hoverEntity: Entity | null = null
+let isHolding = false
+let isDragging = false
 
 function setup() {
     const parent = document.getElementById("app")!
@@ -57,19 +69,27 @@ function setup() {
     app.width = canvas.width
     app.height = canvas.height
 
-    window.addEventListener("mousemove", (event) => {
-        const gridX = (event.clientX / GridSize) | 0
-        const gridY = (event.clientY / GridSize) | 0
-
-        hoverEntity = getEntityAt(gridX, gridY)
-
-        document.body.style.cursor = hoverEntity ? "pointer" : "auto"
+    window.addEventListener("mousedown", (event) => {
+        if (event.button === 0) {
+            isHolding = true
+        }
     })
-    window.addEventListener("click", (event) => {
+    window.addEventListener("mouseup", (event) => {
+        if (event.button === 0) {
+            isHolding = false
+        }
+
+        if (isDragging && event.button === 0) {
+            isDragging = false
+            return
+        }
+
         const { player } = getState()
 
-        const gridX = (event.clientX / GridSize) | 0
-        const gridY = (event.clientY / GridSize) | 0
+        const posX = event.clientX - camera.x
+        const posY = event.clientY - camera.y
+        const gridX = (posX / GridSize) | 0
+        const gridY = (posY / GridSize) | 0
 
         const target = getEntityAt(gridX, gridY)
         if (target) {
@@ -81,6 +101,23 @@ function setup() {
             const targetY = gridY * GridSize
             setMoveTo(player, targetX, targetY)
         }
+    })
+    window.addEventListener("mousemove", (event) => {
+        if (isHolding) {
+            isDragging = true
+            camera.x += event.movementX
+            camera.y += event.movementY
+            return
+        }
+
+        const posX = event.clientX - camera.x
+        const posY = event.clientY - camera.y
+        const gridX = (posX / GridSize) | 0
+        const gridY = (posY / GridSize) | 0
+
+        hoverEntity = getEntityAt(gridX, gridY)
+
+        document.body.style.cursor = hoverEntity ? "pointer" : "auto"
     })
     window.addEventListener("resize", () => {
         canvas.width = parent.clientWidth
@@ -139,8 +176,10 @@ function render() {
 
     update()
 
+    app.ctx.save()
     app.ctx.fillStyle = "#ddd"
     app.ctx.fillRect(0, 0, app.width, app.height)
+    app.ctx.translate(camera.x, camera.y)
 
     for (const entity of entities) {
         renderImg(entity.texture, entity.x, entity.y)
@@ -163,6 +202,8 @@ function render() {
         app.ctx.lineWidth = 2
         app.ctx.strokeRect(startX, startY, endX, endY)
     }
+
+    app.ctx.restore()
 
     requestAnimationFrame(render)
 }
