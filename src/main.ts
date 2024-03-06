@@ -1,6 +1,17 @@
 import { Texture, getTexture, loadTexture } from "./assets/texture"
 import { transitionAiState, updateCharacterAi } from "./entities/character"
-import { Character, Entity, EntityType, GridSize, MapSize, fillData, setMoveTo } from "./entities/entity"
+import {
+    Character,
+    Entity,
+    EntityType,
+    GridSize,
+    MapSize,
+    addEntity,
+    createEntityId,
+    fillData,
+    getEntityAt,
+    setMoveTo,
+} from "./entities/entity"
 import { updateResourceSpawns } from "./resources"
 import { getState, updateState } from "./state"
 import "./style.css"
@@ -79,58 +90,13 @@ function setup() {
     })
 }
 
-function addEntity(type: EntityType, texture: Texture, gridX: number, gridY: number, sizeX: number, sizeY: number) {
-    const { entities } = getState()
-
-    const entity: Entity = {
-        id: entities.length + 1,
-        texture,
-        type,
-        x: gridX * GridSize,
-        y: gridY * GridSize,
-        subscribers: [],
-    }
-
-    fillData(entity, gridX, gridY, sizeX, sizeY)
-    entities.push(entity)
-}
-
-function addTown(gridX: number, gridY: number) {
-    addEntity(EntityType.Town, getTexture("town"), gridX, gridY, 2, 2)
-}
-
-function addCharacter(gridX: number, gridY: number, isPlayer = false) {
-    const character: Character = {
-        id: characters.length + 1,
-        type: isPlayer ? EntityType.Player : EntityType.Npc,
-        texture: getTexture(isPlayer ? "player" : "character"),
-        x: gridX * GridSize,
-        y: gridY * GridSize,
-        startX: 0,
-        startY: 0,
-        endX: 0,
-        endY: 0,
-        tActionStart: 0,
-        tActionEnd: 0,
-        speed: 100,
-        target: null,
-        state: "idle",
-        subscribers: [],
-        inventory: [],
-        inventorySpace: 0,
-    }
-
-    characters.push(character)
-
-    return character
-}
-
 function load() {
     updateState({
         entities: [],
+        entitiesMap: {},
         data: new Uint16Array(MapSize * MapSize),
         ecology: {
-            treesToSpawn: 20,
+            treesToSpawn: 30,
         },
     })
 
@@ -205,16 +171,48 @@ function renderImg(texture: Texture, x: number, y: number) {
     app.ctx.drawImage(texture.img, x, y)
 }
 
-function getEntityAt(gridX: number, gridY: number): Entity | null {
-    const { entities, data } = getState()
-
-    const index = gridX + gridY * MapSize
-    const entityId = data[index]
-    if (entityId) {
-        return entities[entityId - 1] || null
+function createEntity(type: EntityType, texture: Texture, gridX: number, gridY: number, sizeX: number, sizeY: number) {
+    const entity: Entity = {
+        id: createEntityId(),
+        texture,
+        type,
+        x: gridX * GridSize,
+        y: gridY * GridSize,
+        subscribers: [],
     }
 
-    return null
+    fillData(entity, gridX, gridY, sizeX, sizeY)
+    addEntity(entity)
+}
+
+function addTown(gridX: number, gridY: number) {
+    createEntity(EntityType.Town, getTexture("town"), gridX, gridY, 2, 2)
+}
+
+function addCharacter(gridX: number, gridY: number, isPlayer = false) {
+    const character: Character = {
+        id: characters.length + 1,
+        type: isPlayer ? EntityType.Player : EntityType.Npc,
+        texture: getTexture(isPlayer ? "player" : "character"),
+        x: gridX * GridSize,
+        y: gridY * GridSize,
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0,
+        tActionStart: 0,
+        tActionEnd: 0,
+        speed: 100,
+        target: null,
+        state: "idle",
+        subscribers: [],
+        inventory: [],
+        inventorySpace: 0,
+    }
+
+    characters.push(character)
+
+    return character
 }
 
 setup()

@@ -1,7 +1,9 @@
 import { getTexture } from "../assets/texture"
 import { addInventoryItem } from "../inventory"
 import { getState } from "../state"
-import { Character, Entity, EntityType, GridSize, Resource, destroyEntity, fillData } from "./entity"
+import { Character, Entity, EntityType, GridSize, Resource, addEntity, createEntityId, destroyEntity, fillData } from "./entity"
+
+const resourceEntityPool: Resource[] = []
 
 export function extractResource(character: Character, entity: Entity | null) {
     if (!entity || entity.type !== EntityType.Resource) {
@@ -17,25 +19,31 @@ export function extractResource(character: Character, entity: Entity | null) {
         const { ecology } = getState()
 
         destroyEntity(resource)
+        resourceEntityPool.push(resource)
 
         ecology.treesToSpawn += 1
     }
 }
 
-export function addForest(gridX: number, gridY: number) {
-    const { entities } = getState()
-
-    const forest: Resource = {
-        id: entities.length + 1,
-        texture: getTexture("forest"),
-        type: EntityType.Resource,
-        x: gridX * GridSize,
-        y: gridY * GridSize,
-        itemId: "wood",
-        amount: 1,
-        subscribers: [],
+export function addTree(gridX: number, gridY: number) {
+    let tree = resourceEntityPool.pop()
+    if (!tree) {
+        tree = {
+            id: createEntityId(),
+            texture: getTexture("forest"),
+            type: EntityType.Resource,
+            x: 0,
+            y: 0,
+            itemId: "wood",
+            amount: 0,
+            subscribers: [],
+        }
     }
 
-    fillData(forest, gridX, gridY, 1, 1)
-    entities.push(forest)
+    tree.amount = 1
+    tree.x = gridX * GridSize
+    tree.y = gridY * GridSize
+
+    fillData(tree, gridX, gridY, 1, 1)
+    addEntity(tree)
 }

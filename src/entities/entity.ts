@@ -53,6 +53,8 @@ export interface Character extends Entity {
 export const GridSize = 16
 export const MapSize = 128
 
+let NextEntityId = 1
+
 export const EmptyEntity: Entity = {
     id: 0,
     subscribers: [],
@@ -113,6 +115,44 @@ export function fillData(entity: Entity, gridX: number, gridY: number, sizeX: nu
     }
 }
 
+export function unfillData(gridX: number, gridY: number, sizeX: number, sizeY: number) {
+    const { data } = getState()
+
+    for (let x = gridX; x < gridX + sizeX; x += 1) {
+        for (let y = gridY; y < gridY + sizeY; y += 1) {
+            const index = x + y * MapSize
+            data[index] = 0
+        }
+    }
+}
+
+export function addEntity(entity: Entity) {
+    const { entities, entitiesMap } = getState()
+
+    entities.push(entity)
+    entitiesMap[entity.id] = entity
+}
+
+export function destroyEntity(entity: Entity) {
+    const { entities, entitiesMap } = getState()
+
+    const index = entities.findIndex((entry) => entry === entity)
+    if (index === -1) {
+        console.warn(`Could not find entity to destry:`, entity)
+    } else {
+        entities[index] = entities[entities.length - 1]
+        entities.pop()
+    }
+
+    delete entitiesMap[entity.id]
+
+    const gridX = (entity.x / GridSize) | 0
+    const gridY = (entity.y / GridSize) | 0
+    unfillData(gridX, gridY, 1, 1)
+
+    emit(entity, "destroyed")
+}
+
 export function canPlaceEntity(gridX: number, gridY: number) {
     const { data } = getState()
 
@@ -120,21 +160,6 @@ export function canPlaceEntity(gridX: number, gridY: number) {
     const entityId = data[index]
 
     return !entityId
-}
-
-export function destroyEntity(entity: Entity) {
-    const { entities } = getState()
-
-    const index = entities.findIndex((entry) => entry === entity)
-    if (index === -1) {
-        console.warn(`Could not find entity to destry:`, entity)
-        return
-    }
-
-    entities[index] = entities[entities.length - 1]
-    entities.pop()
-
-    emit(entity, "destroyed")
 }
 
 export function subscribe(target: Entity, entity: Entity, callback: SubscriberCallback) {
@@ -164,4 +189,20 @@ export function emit(from: Entity, event: EntityEvent) {
         const subscriber = from.subscribers[n]
         subscriber.callback(from, subscriber.entity, event)
     }
+}
+
+export function createEntityId() {
+    return NextEntityId++
+}
+
+export function getEntityAt(gridX: number, gridY: number): Entity | null {
+    const { entitiesMap, data } = getState()
+
+    const index = gridX + gridY * MapSize
+    const entityId = data[index]
+    if (entityId) {
+        return entitiesMap[entityId] || null
+    }
+
+    return null
 }

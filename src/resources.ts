@@ -1,5 +1,5 @@
 import { canPlaceEntity } from "./entities/entity"
-import { addForest } from "./entities/resource"
+import { addTree } from "./entities/resource"
 import { getState } from "./state"
 import { randomNumber } from "./utils"
 
@@ -16,7 +16,7 @@ export function updateResourceSpawns() {
                     continue retry
                 }
 
-                addForest(gridX, gridY)
+                addTree(gridX, gridY)
                 break retry
             }
         }

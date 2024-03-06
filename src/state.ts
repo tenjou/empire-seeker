@@ -2,6 +2,7 @@ import { Character, Entity } from "./entities/entity"
 
 interface GameState {
     entities: Entity[]
+    entitiesMap: Record<number, Entity>
     data: Uint16Array
     player: Character
     ecology: {
