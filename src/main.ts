@@ -15,16 +15,17 @@ import "./ui/commands-view"
 import "./ui/inventory-view"
 import { InventoryView } from "./ui/inventory-view"
 
+interface Camera {
+    x: number
+    y: number
+}
+
 interface Context {
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
     width: number
     height: number
-}
-
-interface Camera {
-    x: number
-    y: number
+    camera: Camera
 }
 
 const app: Context = {
@@ -32,11 +33,10 @@ const app: Context = {
     ctx: {} as CanvasRenderingContext2D,
     width: 0,
     height: 0,
-}
-
-const camera: Camera = {
-    x: 0,
-    y: 0,
+    camera: {
+        x: 0,
+        y: 0,
+    },
 }
 
 let tPrev = 0
@@ -79,8 +79,8 @@ function setup() {
 
         const { player } = getState()
 
-        const posX = event.clientX - camera.x
-        const posY = event.clientY - camera.y
+        const posX = event.clientX - app.camera.x
+        const posY = event.clientY - app.camera.y
         const gridX = (posX / GridSize) | 0
         const gridY = (posY / GridSize) | 0
 
@@ -98,13 +98,13 @@ function setup() {
     window.addEventListener("mousemove", (event) => {
         if (isHolding) {
             isDragging = true
-            camera.x += event.movementX
-            camera.y += event.movementY
+            app.camera.x += event.movementX
+            app.camera.y += event.movementY
             return
         }
 
-        const posX = event.clientX - camera.x
-        const posY = event.clientY - camera.y
+        const posX = event.clientX - app.camera.x
+        const posY = event.clientY - app.camera.y
         const gridX = (posX / GridSize) | 0
         const gridY = (posY / GridSize) | 0
 
@@ -193,17 +193,27 @@ function render() {
     app.ctx.save()
     app.ctx.fillStyle = "#ddd"
     app.ctx.fillRect(0, 0, app.width, app.height)
-    app.ctx.translate(camera.x, camera.y)
+    app.ctx.translate(app.camera.x, app.camera.y)
 
     for (const entity of entities) {
+        if (entity.isHidden) {
+            continue
+        }
+
         renderImg(entity.texture, entity.x, entity.y)
     }
 
     for (const character of characters) {
+        if (character.isHidden) {
+            continue
+        }
+
         renderImg(character.texture, character.x, character.y)
     }
 
-    renderImg(player.texture, player.x, player.y)
+    if (!player.isHidden) {
+        renderImg(player.texture, player.x, player.y)
+    }
 
     if (hoverEntity) {
         const size = hoverEntity.type === EntityType.Town ? 2 : 1

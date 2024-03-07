@@ -28,6 +28,7 @@ export interface Entity {
     x: number
     y: number
     subscribers: EntitySubscriber[]
+    isHidden: boolean
 }
 
 export interface Resource extends Entity {
@@ -51,6 +52,7 @@ export const EmptyEntity: Entity = {
     type: EntityType.Placeholder,
     x: 0,
     y: 0,
+    isHidden: true,
 }
 
 export function createEntityId() {
@@ -65,6 +67,7 @@ export function createEntity(type: EntityType, texture: Texture, gridX: number, 
         x: gridX * GridSize,
         y: gridY * GridSize,
         subscribers: [],
+        isHidden: false,
     }
 
     fillData(entity, gridX, gridY, sizeX, sizeY)

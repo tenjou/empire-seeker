@@ -20,8 +20,6 @@ export function loadPopups() {
                 break
         }
     })
-
-    openPopup("trading-popup")
 }
 
 export function openPopup(tag: string) {

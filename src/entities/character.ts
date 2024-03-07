@@ -4,7 +4,7 @@ import { getState } from "../state"
 import { Entity, EntityEvent, EntityType, GridSize, emit, findEntity, setMoveTo, subscribe, unsubscribe } from "./entity"
 import { extractResource } from "./resource"
 
-export type AiState = "idle" | "move-to-target" | "search-wood" | "gather-resource" | "return-town" | "sell"
+export type AiState = "idle" | "move-to-target" | "search-wood" | "gather-resource" | "return-town" | "sell" | "enter" | "exit"
 
 export interface Character extends Entity {
     startX: number
@@ -24,9 +24,9 @@ export function transitionAiState(character: Character, newState: AiState, targe
         return
     }
 
+    handleStateEnter(character, newState)
+
     character.state = newState
-    character.tActionStart = 0
-    character.tActionEnd = 0
 
     if (character.target !== target) {
         if (character.target) {
@@ -47,11 +47,38 @@ export function transitionAiState(character: Character, newState: AiState, targe
     emit(character, "state-updated")
 }
 
+function handleStateEnter(character: Character, newState: AiState) {
+    switch (newState) {
+        case "sell": {
+            const { time } = getState()
+
+            const sellDelay = character.inventory.spaceUsed * 1000
+            character.tActionStart = time.curr
+            character.tActionEnd = time.curr + sellDelay
+            break
+        }
+
+        default: {
+            character.tActionStart = 0
+            character.tActionEnd = 0
+            break
+        }
+    }
+}
+
 export function updateCharacterAi(character: Character, tCurr: number) {
     switch (character.state) {
         case "idle": {
             if (character.type === EntityType.Npc) {
-                transitionAiState(character, "search-wood")
+                if (character.isHidden) {
+                    if (character.inventory.spaceUsed > 0) {
+                        transitionAiState(character, "sell")
+                    } else {
+                        transitionAiState(character, "exit")
+                    }
+                } else {
+                    transitionAiState(character, "search-wood")
+                }
             }
             return
         }
@@ -83,15 +110,16 @@ export function updateCharacterAi(character: Character, tCurr: number) {
                             return
 
                         case EntityType.Town:
-                            transitionAiState(character, "sell")
+                        case EntityType.Village:
+                            transitionAiState(character, "enter")
                             return
 
                         default:
-                            transitionAiState(character, "idle")
+                            transitionAiState(character, "return-town")
                             return
                     }
                 } else {
-                    transitionAiState(character, "idle")
+                    transitionAiState(character, "return-town")
                     return
                 }
             }
@@ -133,8 +161,24 @@ export function updateCharacterAi(character: Character, tCurr: number) {
         }
 
         case "sell": {
+            if (character.tActionEnd > tCurr) {
+                return
+            }
+
             sellInventory(character.inventory)
-            transitionAiState(character, "search-wood")
+            transitionAiState(character, "idle")
+            return
+        }
+
+        case "enter": {
+            character.isHidden = true
+            transitionAiState(character, "idle")
+            break
+        }
+
+        case "exit": {
+            character.isHidden = false
+            transitionAiState(character, "idle")
             break
         }
     }
@@ -172,6 +216,7 @@ export function addCharacter(gridX: number, gridY: number, isPlayer = false) {
             spaceMax: 2,
             spaceUsed: 0,
         },
+        isHidden: false,
     }
 
     characters.push(character)

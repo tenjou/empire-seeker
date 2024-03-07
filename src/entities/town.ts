@@ -19,6 +19,7 @@ export function addTown(gridX: number, gridY: number) {
             spaceMax: 100,
             spaceUsed: 0,
         },
+        isHidden: false,
     }
 
     fillData(town, gridX, gridY, 2, 2)

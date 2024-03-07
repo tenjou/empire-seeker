@@ -40,6 +40,7 @@ export function addTree(gridX: number, gridY: number) {
             itemId: "wood",
             amount: 0,
             subscribers: [],
+            isHidden: false,
         }
     }
 

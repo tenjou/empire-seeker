@@ -28,6 +28,7 @@ export function createVillage(gridX: number, gridY: number) {
             spaceMax: 10,
             spaceUsed: 0,
         },
+        isHidden: false,
     }
 
     fillData(village, gridX, gridY, 1, 1)
