@@ -179,6 +179,17 @@ function update() {
     updateVillages()
 
     for (const character of characters) {
+        if (character.ai.state === "move-to-target") {
+            const t = (time.curr - character.tActionStart) / (character.tActionEnd - character.tActionStart)
+            if (t >= 1) {
+                character.x = character.endX
+                character.y = character.endY
+            } else {
+                character.x = character.startX + (character.endX - character.startX) * t
+                character.y = character.startY + (character.endY - character.startY) * t
+            }
+        }
+
         updateCharacterAi(character, time.curr)
     }
 

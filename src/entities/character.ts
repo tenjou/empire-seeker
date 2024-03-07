@@ -15,71 +15,90 @@ export interface Character extends Entity {
     tActionStart: number
     tActionEnd: number
     speed: number
-    state: AiState
     inventory: Inventory
+    ai: {
+        state: AiState
+        statePrev: AiState
+        tUpdate: number
+    }
 }
 
-export function transitionAiState(character: Character, newState: AiState, target: Entity | null = null) {
-    if (character.state === newState && character.target === target) {
-        return
-    }
+function handleStateEnter(character: Character, newState: AiState, tCurr: number) {
+    const { ai } = character
+    ai.statePrev = ai.state
+    ai.state = newState
+    ai.tUpdate = 0
 
-    handleStateEnter(character, newState)
-
-    character.state = newState
-
-    if (character.target !== target) {
-        if (character.target) {
-            unsubscribe(character.target, character)
-        }
-
-        character.target = target
-
-        if (character.target) {
-            subscribe(character.target, character, handleEntityEvent)
-        }
-    }
-
-    if (target && newState === "move-to-target") {
-        setMoveTo(character, target.x, target.y)
-    }
-
-    emit(character, "state-updated")
-}
-
-function handleStateEnter(character: Character, newState: AiState) {
     switch (newState) {
-        case "sell": {
-            const { time } = getState()
+        case "move-to-target": {
+            if (!character.target) {
+                console.warn(`Missing a target:`, character)
+                break
+            }
 
-            const sellDelay = character.inventory.spaceUsed * 1000
-            character.tActionStart = time.curr
-            character.tActionEnd = time.curr + sellDelay
+            setMoveTo(character, character.target.x, character.target.y)
+            character.ai.tUpdate = character.tActionEnd
             break
         }
 
-        default: {
-            character.tActionStart = 0
-            character.tActionEnd = 0
+        case "gather-resource": {
+            ai.tUpdate = tCurr + 2000
+            break
+        }
+
+        case "enter": {
+            character.isHidden = true
+            break
+        }
+
+        case "exit": {
+            character.isHidden = false
+            break
+        }
+
+        case "sell": {
+            const sellDelay = character.inventory.spaceUsed * 1000
+            ai.tUpdate = tCurr + sellDelay
             break
         }
     }
 }
 
 export function updateCharacterAi(character: Character, tCurr: number) {
-    switch (character.state) {
+    const { ai } = character
+
+    if (ai.tUpdate > tCurr) {
+        return
+    }
+
+    switch (ai.state) {
         case "idle": {
             if (character.type === EntityType.Npc) {
-                if (character.isHidden) {
-                    if (character.inventory.spaceUsed > 0) {
-                        transitionAiState(character, "sell")
-                    } else {
-                        transitionAiState(character, "exit")
-                    }
-                } else {
-                    transitionAiState(character, "search-wood")
-                }
+                transitionAiState(character, "search-wood")
+            } else {
+                ai.tUpdate = tCurr + 5000
             }
+            break
+        }
+
+        case "move-to-target": {
+            if (!character.target) {
+                console.warn(`Missing a target:`, character)
+                break
+            }
+
+            switch (character.target.type) {
+                case EntityType.Resource:
+                    transitionAiState(character, "gather-resource", character.target)
+                    return
+
+                case EntityType.Town:
+                case EntityType.Village:
+                    transitionAiState(character, "enter", character.target)
+                    return
+            }
+
+            transitionAiState(character, "return-town")
             return
         }
 
@@ -98,53 +117,20 @@ export function updateCharacterAi(character: Character, tCurr: number) {
             break
         }
 
-        case "move-to-target": {
-            if (character.tActionEnd <= tCurr) {
-                character.x = character.endX
-                character.y = character.endY
-
-                if (character.target) {
-                    switch (character.target.type) {
-                        case EntityType.Resource:
-                            transitionAiState(character, "gather-resource", character.target)
-                            return
-
-                        case EntityType.Town:
-                        case EntityType.Village:
-                            transitionAiState(character, "enter")
-                            return
-
-                        default:
-                            transitionAiState(character, "return-town")
-                            return
-                    }
-                } else {
-                    transitionAiState(character, "return-town")
-                    return
-                }
-            }
-
-            const t = (tCurr - character.tActionStart) / (character.tActionEnd - character.tActionStart)
-            character.x = character.startX + (character.endX - character.startX) * t
-            character.y = character.startY + (character.endY - character.startY) * t
-            break
-        }
-
         case "gather-resource": {
-            if (character.tActionEnd === 0) {
-                character.tActionEnd = tCurr + 2000
+            const resourceLeft = extractResource(character, character.target)
+
+            if (!haveInventorySpace(character.inventory, 1)) {
+                transitionAiState(character, "return-town")
                 return
             }
 
-            if (character.tActionEnd <= tCurr) {
-                character.tActionEnd = 0
-
-                extractResource(character, character.target)
-
-                if (!haveInventorySpace(character.inventory, 1)) {
-                    transitionAiState(character, "return-town")
-                }
+            if (!resourceLeft) {
+                transitionAiState(character, "search-wood")
+                return
             }
+
+            ai.tUpdate = tCurr + 2000
             break
         }
 
@@ -160,36 +146,55 @@ export function updateCharacterAi(character: Character, tCurr: number) {
             return
         }
 
-        case "sell": {
-            if (character.tActionEnd > tCurr) {
-                return
+        case "enter": {
+            if (character.inventory.spaceUsed > 0) {
+                transitionAiState(character, "sell", character.target)
+            } else {
+                transitionAiState(character, "exit", character.target)
             }
+            return
+        }
 
-            sellInventory(character.inventory)
+        case "exit": {
             transitionAiState(character, "idle")
             return
         }
 
-        case "enter": {
-            character.isHidden = true
-            transitionAiState(character, "idle")
-            break
-        }
-
-        case "exit": {
-            character.isHidden = false
-            transitionAiState(character, "idle")
-            break
+        case "sell": {
+            sellInventory(character.inventory)
+            transitionAiState(character, character.ai.statePrev, character.target)
+            return
         }
     }
 }
 
-function handleEntityEvent(_from: Entity, to: Entity, event: EntityEvent) {
-    switch (event) {
-        case "destroyed":
-            transitionAiState(to as Character, "search-wood")
-            break
+export function transitionAiState(character: Character, newState: AiState, target: Entity | null = null) {
+    if (character.ai.state === newState && character.target === target) {
+        return
     }
+
+    const { time } = getState()
+
+    if (character.target !== target) {
+        if (character.target) {
+            unsubscribe(character.target, character)
+        }
+        character.target = target
+        if (character.target) {
+            subscribe(character.target, character, handleEntityEvent)
+        }
+    }
+
+    handleStateEnter(character, newState, time.curr)
+    emit(character, "state-updated")
+}
+
+function handleEntityEvent(_from: Entity, to: Entity, event: EntityEvent) {
+    // switch (event) {
+    //     case "destroyed":
+    //         transitionAiState(to as Character, "search-wood")
+    //         break
+    // }
 }
 
 export function addCharacter(gridX: number, gridY: number, isPlayer = false) {
@@ -201,6 +206,7 @@ export function addCharacter(gridX: number, gridY: number, isPlayer = false) {
         texture: getTexture(isPlayer ? "player" : "character"),
         x: gridX * GridSize,
         y: gridY * GridSize,
+        isHidden: false,
         startX: 0,
         startY: 0,
         endX: 0,
@@ -209,14 +215,17 @@ export function addCharacter(gridX: number, gridY: number, isPlayer = false) {
         tActionEnd: 0,
         speed: 100,
         target: null,
-        state: "idle",
         subscribers: [],
         inventory: {
             items: [],
             spaceMax: 2,
             spaceUsed: 0,
         },
-        isHidden: false,
+        ai: {
+            state: "idle",
+            statePrev: "idle",
+            tUpdate: 0,
+        },
     }
 
     characters.push(character)

@@ -9,7 +9,7 @@ const resourceEntityPool: Resource[] = []
 
 export function extractResource(character: Character, entity: Entity | null) {
     if (!entity || entity.type !== EntityType.Resource) {
-        return
+        return 0
     }
 
     const resource = entity as Resource
@@ -26,6 +26,8 @@ export function extractResource(character: Character, entity: Entity | null) {
 
         ecology.treesToSpawn += 1
     }
+
+    return resource.amount
 }
 
 export function addTree(gridX: number, gridY: number) {

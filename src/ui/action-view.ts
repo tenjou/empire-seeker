@@ -23,11 +23,12 @@ export class ActionView extends HTMLComponent {
 
     update() {
         const { player } = getState()
+        const { ai } = player
 
-        if (player.state === "move-to-target" && player.target) {
-            this.setText("", `${player.state}: ${EntityType[player.target.type]}`)
+        if (ai.state === "move-to-target" && player.target) {
+            this.setText("", `${ai.state}: ${EntityType[player.target.type]}`)
         } else {
-            this.setText("", player.state)
+            this.setText("", ai.state)
         }
     }
 }
