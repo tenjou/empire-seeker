@@ -1,11 +1,14 @@
-import { Texture, getTexture, loadTexture } from "./assets/texture"
-import { Character, transitionAiState, updateCharacterAi } from "./entities/character"
-import { Entity, EntityType, GridSize, MapSize, addEntity, createEntityId, fillData, getEntityAt, setMoveTo } from "./entities/entity"
+import { Texture, loadTexture } from "./assets/texture"
+import { Character, addCharacter, transitionAiState, updateCharacterAi } from "./entities/character"
+import { Entity, EntityType, GridSize, MapSize, getEntityAt, setMoveTo } from "./entities/entity"
+import { addTown } from "./entities/town"
 import { createVillage, updateVillages } from "./entities/village"
+import { loadPopups } from "./popup"
 import { updateResourceSpawns } from "./resources"
 import { getState, loadState, updateState } from "./state"
 import "./style.css"
 import { loadTooltip, showEntityTooltip as updateEntityTooltip } from "./tooltip/tooltip"
+import "./trading/ui/trading-popup"
 import "./ui/action-view"
 import { ActionView } from "./ui/action-view"
 import "./ui/commands-view"
@@ -35,8 +38,6 @@ const camera: Camera = {
     x: 0,
     y: 0,
 }
-
-const characters: Character[] = []
 
 let tPrev = 0
 let player: Character = {} as Character
@@ -124,6 +125,7 @@ function load() {
     loadState({
         player: {} as Character,
         entities: [],
+        characters: [],
         entitiesMap: {},
         data: new Uint16Array(MapSize * MapSize),
         ecology: {
@@ -163,10 +165,11 @@ function loadUI() {
     parent.appendChild(new ActionView())
 
     loadTooltip()
+    loadPopups()
 }
 
 function update() {
-    const { time } = getState()
+    const { time, characters } = getState()
 
     const tCurr = Date.now()
     const tDelta = tCurr - tPrev
@@ -183,7 +186,7 @@ function update() {
 }
 
 function render() {
-    const { entities } = getState()
+    const { entities, characters } = getState()
 
     update()
 
@@ -221,53 +224,6 @@ function render() {
 
 function renderImg(texture: Texture, x: number, y: number) {
     app.ctx.drawImage(texture.img, x, y)
-}
-
-function createEntity(type: EntityType, texture: Texture, gridX: number, gridY: number, sizeX: number, sizeY: number) {
-    const entity: Entity = {
-        id: createEntityId(),
-        texture,
-        type,
-        x: gridX * GridSize,
-        y: gridY * GridSize,
-        subscribers: [],
-    }
-
-    fillData(entity, gridX, gridY, sizeX, sizeY)
-    addEntity(entity)
-}
-
-function addTown(gridX: number, gridY: number) {
-    createEntity(EntityType.Town, getTexture("town"), gridX, gridY, 2, 2)
-}
-
-function addCharacter(gridX: number, gridY: number, isPlayer = false) {
-    const character: Character = {
-        id: characters.length + 1,
-        type: isPlayer ? EntityType.Player : EntityType.Npc,
-        texture: getTexture(isPlayer ? "player" : "character"),
-        x: gridX * GridSize,
-        y: gridY * GridSize,
-        startX: 0,
-        startY: 0,
-        endX: 0,
-        endY: 0,
-        tActionStart: 0,
-        tActionEnd: 0,
-        speed: 100,
-        target: null,
-        state: "idle",
-        subscribers: [],
-        inventory: {
-            items: [],
-            spaceMax: 2,
-            spaceUsed: 0,
-        },
-    }
-
-    characters.push(character)
-
-    return character
 }
 
 setup()

@@ -1,5 +1,7 @@
+import { getTexture } from "../assets/texture"
 import { Inventory, haveInventorySpace, sellInventory } from "../inventory"
-import { Entity, EntityEvent, EntityType, emit, findEntity, setMoveTo, subscribe, unsubscribe } from "./entity"
+import { getState } from "../state"
+import { Entity, EntityEvent, EntityType, GridSize, emit, findEntity, setMoveTo, subscribe, unsubscribe } from "./entity"
 import { extractResource } from "./resource"
 
 export type AiState = "idle" | "move-to-target" | "search-wood" | "gather-resource" | "return-town" | "sell"
@@ -144,4 +146,35 @@ function handleEntityEvent(_from: Entity, to: Entity, event: EntityEvent) {
             transitionAiState(to as Character, "search-wood")
             break
     }
+}
+
+export function addCharacter(gridX: number, gridY: number, isPlayer = false) {
+    const { characters } = getState()
+
+    const character: Character = {
+        id: characters.length + 1,
+        type: isPlayer ? EntityType.Player : EntityType.Npc,
+        texture: getTexture(isPlayer ? "player" : "character"),
+        x: gridX * GridSize,
+        y: gridY * GridSize,
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0,
+        tActionStart: 0,
+        tActionEnd: 0,
+        speed: 100,
+        target: null,
+        state: "idle",
+        subscribers: [],
+        inventory: {
+            items: [],
+            spaceMax: 2,
+            spaceUsed: 0,
+        },
+    }
+
+    characters.push(character)
+
+    return character
 }

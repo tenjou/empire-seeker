@@ -57,6 +57,20 @@ export function createEntityId() {
     return NextEntityId++
 }
 
+export function createEntity(type: EntityType, texture: Texture, gridX: number, gridY: number, sizeX: number, sizeY: number) {
+    const entity: Entity = {
+        id: createEntityId(),
+        texture,
+        type,
+        x: gridX * GridSize,
+        y: gridY * GridSize,
+        subscribers: [],
+    }
+
+    fillData(entity, gridX, gridY, sizeX, sizeY)
+    addEntity(entity)
+}
+
 export function setMoveTo(character: Character, targetX: number, targetY: number) {
     const { time } = getState()
 

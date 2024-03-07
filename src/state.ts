@@ -3,6 +3,7 @@ import { Entity } from "./entities/entity"
 
 interface GameState {
     entities: Entity[]
+    characters: Character[]
     entitiesMap: Record<number, Entity>
     data: Uint16Array
     player: Character
