@@ -107,7 +107,7 @@ function setup() {
         } else {
             targetEntity.x = gridX * GridSize
             targetEntity.y = gridY * GridSize
-            transitionAiState(player, "move-to-target", targetEntity)
+            transitionAiState(player, "move-to-target", targetEntity, true)
         }
     })
     window.addEventListener("mousemove", (event) => {

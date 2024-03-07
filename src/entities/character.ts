@@ -181,8 +181,9 @@ export function updateCharacterAi(character: Character, tCurr: number) {
     }
 }
 
-export function transitionAiState(character: Character, newState: AiState, target: Entity | null = null) {
-    if (character.ai.state === newState && character.target === target) {
+export function transitionAiState(character: Character, newState: AiState, target: Entity | null = null, force = false) {
+    if (character.ai.state === newState && character.target === target && !force) {
+        console.warn(`Already on state: ${newState}`)
         return
     }
 
