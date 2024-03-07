@@ -5,7 +5,7 @@ export interface Texture {
 
 const textures: Record<string, Texture> = {}
 
-const emptyTexture: Texture = {
+export const EmptyTexture: Texture = {
     img: new Image(),
     isLoading: false,
 }
@@ -29,7 +29,7 @@ export function getTexture(id: string) {
     const texture = textures[id]
     if (!texture) {
         console.warn(`Could not find texture with id: ${id}`)
-        return emptyTexture
+        return EmptyTexture
     }
 
     return texture

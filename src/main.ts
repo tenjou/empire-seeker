@@ -1,6 +1,6 @@
-import { Texture, loadTexture } from "./assets/texture"
+import { EmptyTexture, Texture, loadTexture } from "./assets/texture"
 import { Character, addCharacter, transitionAiState, updateCharacterAi } from "./entities/character"
-import { Entity, EntityType, GridSize, MapSize, getEntityAt, setMoveTo } from "./entities/entity"
+import { Entity, EntityType, GridSize, MapSize, getEntityAt } from "./entities/entity"
 import { addTown } from "./entities/town"
 import { createVillage, updateVillages } from "./entities/village"
 import { loadPopups } from "./popup"
@@ -14,6 +14,7 @@ import { ActionView } from "./ui/action-view"
 import "./ui/commands-view"
 import "./ui/inventory-view"
 import { InventoryView } from "./ui/inventory-view"
+import "./ui/settlement-popup"
 
 interface Camera {
     x: number
@@ -44,6 +45,16 @@ let player: Character = {} as Character
 let hoverEntity: Entity | null = null
 let isHolding = false
 let isDragging = false
+
+const targetEntity: Entity = {
+    id: 0,
+    isHidden: true,
+    subscribers: [],
+    texture: EmptyTexture,
+    type: EntityType.Placeholder,
+    x: 0,
+    y: 0,
+}
 
 function setup() {
     const parent = document.getElementById("app")!
@@ -88,11 +99,9 @@ function setup() {
         if (target) {
             transitionAiState(player, "move-to-target", target)
         } else {
-            transitionAiState(player, "move-to-target")
-
-            const targetX = gridX * GridSize
-            const targetY = gridY * GridSize
-            setMoveTo(player, targetX, targetY)
+            targetEntity.x = gridX * GridSize
+            targetEntity.y = gridY * GridSize
+            transitionAiState(player, "move-to-target", targetEntity)
         }
     })
     window.addEventListener("mousemove", (event) => {

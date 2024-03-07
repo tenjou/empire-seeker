@@ -8,6 +8,7 @@ export function loadPopups() {
     popupsElement = document.getElementById("popups")!
     popupsElement.onmousedown = stopPropagation
     popupsElement.onmouseup = stopPropagation
+    popupsElement.onmousemove = stopPropagation
     popupsElement.onclick = (event) => {
         event.stopPropagation()
         tryCloseCurrentPopup()
@@ -22,7 +23,9 @@ export function loadPopups() {
     })
 }
 
-export function openPopup(tag: string) {
+let currCb: () => void = () => {}
+
+export function openPopup(tag: string, cb: () => void) {
     const popupsElement = document.getElementById("popups")!
 
     const popup = document.createElement(tag)
@@ -32,6 +35,8 @@ export function openPopup(tag: string) {
     if (popupsElement.children.length === 1) {
         popupsElement.classList.remove("hide")
     }
+
+    currCb = cb
 }
 
 export function tryCloseCurrentPopup() {
@@ -42,6 +47,8 @@ export function tryCloseCurrentPopup() {
 
     const currPopup = popups[popups.length - 1]
     popupsElement.removeChild(currPopup)
+
+    currCb()
 
     if (popups.length <= 0) {
         popupsElement.classList.add("hide")

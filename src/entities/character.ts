@@ -1,5 +1,6 @@
 import { getTexture } from "../assets/texture"
 import { Inventory, haveInventorySpace, sellInventory } from "../inventory"
+import { openPopup } from "../popup"
 import { getState } from "../state"
 import { Entity, EntityEvent, EntityType, GridSize, emit, findEntity, setMoveTo, subscribe, unsubscribe } from "./entity"
 import { extractResource } from "./resource"
@@ -48,6 +49,12 @@ function handleStateEnter(character: Character, newState: AiState, tCurr: number
 
         case "enter": {
             character.isHidden = true
+
+            if (character.type === EntityType.Player) {
+                openPopup("settlement-popup", () => {
+                    transitionAiState(character, "exit")
+                })
+            }
             break
         }
 
@@ -95,6 +102,10 @@ export function updateCharacterAi(character: Character, tCurr: number) {
                 case EntityType.Town:
                 case EntityType.Village:
                     transitionAiState(character, "enter", character.target)
+                    return
+
+                case EntityType.Placeholder:
+                    transitionAiState(character, "idle")
                     return
             }
 
@@ -150,7 +161,9 @@ export function updateCharacterAi(character: Character, tCurr: number) {
             if (character.inventory.spaceUsed > 0) {
                 transitionAiState(character, "sell", character.target)
             } else {
-                transitionAiState(character, "exit", character.target)
+                if (character.type !== EntityType.Player) {
+                    transitionAiState(character, "exit", character.target)
+                }
             }
             return
         }
@@ -189,13 +202,7 @@ export function transitionAiState(character: Character, newState: AiState, targe
     emit(character, "state-updated")
 }
 
-function handleEntityEvent(_from: Entity, to: Entity, event: EntityEvent) {
-    // switch (event) {
-    //     case "destroyed":
-    //         transitionAiState(to as Character, "search-wood")
-    //         break
-    // }
-}
+function handleEntityEvent(_from: Entity, _to: Entity, _event: EntityEvent) {}
 
 export function addCharacter(gridX: number, gridY: number, isPlayer = false) {
     const { characters } = getState()
