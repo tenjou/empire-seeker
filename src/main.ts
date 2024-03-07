@@ -49,6 +49,7 @@ let player: Character = {} as Character
 let hoverEntity: Entity | null = null
 let isHolding = false
 let isDragging = false
+let draggingAccumulator = 0
 
 const targetEntity: Entity = {
     id: 0,
@@ -91,6 +92,7 @@ function setup() {
 
         if (isDragging && event.button === 0) {
             isDragging = false
+            draggingAccumulator = 0
             return
         }
 
@@ -112,12 +114,12 @@ function setup() {
     })
     window.addEventListener("mousemove", (event) => {
         if (isHolding) {
-            isDragging = true
-
             const { camera, width, height, mapWidth, mapHeight } = app
 
+            draggingAccumulator += Math.abs(event.movementX) + Math.abs(event.movementY)
             camera.x -= event.movementX
             camera.y -= event.movementY
+
             if (camera.x < 0) {
                 camera.x = 0
             } else if (camera.x + width >= mapWidth) {
@@ -129,7 +131,11 @@ function setup() {
             } else if (camera.y + height >= mapHeight) {
                 camera.y = mapHeight - height
             }
-            return
+
+            if (draggingAccumulator >= 5) {
+                isDragging = true
+                return
+            }
         }
 
         const posX = event.clientX + app.camera.x
