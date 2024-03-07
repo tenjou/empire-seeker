@@ -26,6 +26,8 @@ interface Context {
     ctx: CanvasRenderingContext2D
     width: number
     height: number
+    mapWidth: number
+    mapHeight: number
     camera: Camera
 }
 
@@ -34,6 +36,8 @@ const app: Context = {
     ctx: {} as CanvasRenderingContext2D,
     width: 0,
     height: 0,
+    mapWidth: 0,
+    mapHeight: 0,
     camera: {
         x: 0,
         y: 0,
@@ -72,6 +76,8 @@ function setup() {
     app.ctx = ctx
     app.width = canvas.width
     app.height = canvas.height
+    app.mapWidth = MapSize * GridSize
+    app.mapHeight = MapSize * GridSize
 
     window.addEventListener("mousedown", (event) => {
         if (event.button === 0) {
@@ -90,8 +96,8 @@ function setup() {
 
         const { player } = getState()
 
-        const posX = event.clientX - app.camera.x
-        const posY = event.clientY - app.camera.y
+        const posX = event.clientX + app.camera.x
+        const posY = event.clientY + app.camera.y
         const gridX = (posX / GridSize) | 0
         const gridY = (posY / GridSize) | 0
 
@@ -107,13 +113,27 @@ function setup() {
     window.addEventListener("mousemove", (event) => {
         if (isHolding) {
             isDragging = true
-            app.camera.x += event.movementX
-            app.camera.y += event.movementY
+
+            const { camera, width, height, mapWidth, mapHeight } = app
+
+            camera.x -= event.movementX
+            camera.y -= event.movementY
+            if (camera.x < 0) {
+                camera.x = 0
+            } else if (camera.x + width >= mapWidth) {
+                camera.x = mapWidth - width
+            }
+
+            if (camera.y < 0) {
+                camera.y = 0
+            } else if (camera.y + height >= mapHeight) {
+                camera.y = mapHeight - height
+            }
             return
         }
 
-        const posX = event.clientX - app.camera.x
-        const posY = event.clientY - app.camera.y
+        const posX = event.clientX + app.camera.x
+        const posY = event.clientY + app.camera.y
         const gridX = (posX / GridSize) | 0
         const gridY = (posY / GridSize) | 0
 
@@ -138,7 +158,7 @@ function load() {
         entitiesMap: {},
         data: new Uint16Array(MapSize * MapSize),
         ecology: {
-            treesToSpawn: 30,
+            treesToSpawn: 200,
         },
         time: {
             curr: 0,
@@ -210,10 +230,16 @@ function render() {
 
     update()
 
-    app.ctx.save()
-    app.ctx.fillStyle = "#ddd"
-    app.ctx.fillRect(0, 0, app.width, app.height)
-    app.ctx.translate(app.camera.x, app.camera.y)
+    const { ctx } = app
+
+    ctx.save()
+    ctx.fillStyle = "#ddd"
+    ctx.fillRect(0, 0, app.width, app.height)
+    ctx.translate(-app.camera.x, -app.camera.y)
+
+    ctx.strokeStyle = "#000"
+    ctx.lineWidth = 3
+    ctx.strokeRect(0.5, 0.5, app.mapWidth, app.mapHeight)
 
     for (const entity of entities) {
         if (entity.isHidden) {
@@ -242,12 +268,12 @@ function render() {
         const endX = size * GridSize + 4
         const endY = size * GridSize + 4
 
-        app.ctx.strokeStyle = "white"
-        app.ctx.lineWidth = 2
-        app.ctx.strokeRect(startX, startY, endX, endY)
+        ctx.strokeStyle = "white"
+        ctx.lineWidth = 2
+        ctx.strokeRect(startX, startY, endX, endY)
     }
 
-    app.ctx.restore()
+    ctx.restore()
 
     requestAnimationFrame(render)
 }
