@@ -1,5 +1,6 @@
 import { Character } from "./entities/character"
 import { Entity } from "./entities/entity"
+import { Faction, FactionType } from "./factions/factions"
 
 interface GameState {
     entities: Entity[]
@@ -7,6 +8,7 @@ interface GameState {
     entitiesMap: Record<number, Entity>
     data: Uint16Array
     player: Character
+    factions: Record<FactionType, Faction>
     ecology: {
         treesToSpawn: number
     }

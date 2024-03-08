@@ -3,6 +3,7 @@ import { Character, addCharacter, transitionAiState, updateCharacterAi } from ".
 import { Entity, EntityType, GridSize, MapSize, getEntityAt } from "./entities/entity"
 import { addTown } from "./entities/town"
 import { createVillage, updateVillages } from "./entities/village"
+import { FactionType, createFaction } from "./factions/factions"
 import { loadPopups } from "./popup"
 import { updateResourceSpawns } from "./resources"
 import { getState, loadState, updateState } from "./state"
@@ -12,6 +13,9 @@ import "./trading/ui/trading-popup"
 import "./ui/action-view"
 import { ActionView } from "./ui/action-view"
 import "./ui/commands-view"
+import { getElement } from "./ui/dom"
+import "./ui/info-view"
+import { InfoView } from "./ui/info-view"
 import "./ui/inventory-view"
 import { InventoryView } from "./ui/inventory-view"
 import "./ui/settlement-popup"
@@ -143,6 +147,8 @@ function setup() {
         const gridX = (posX / GridSize) | 0
         const gridY = (posY / GridSize) | 0
 
+        getElement<InfoView>("info-view").updateCoords(gridX, gridY)
+
         hoverEntity = getEntityAt(gridX, gridY)
         updateEntityTooltip(hoverEntity)
 
@@ -163,6 +169,12 @@ function load() {
         characters: [],
         entitiesMap: {},
         data: new Uint16Array(MapSize * MapSize),
+        factions: {
+            [FactionType.Neutral]: createFaction(FactionType.Neutral),
+            [FactionType.Player]: createFaction(FactionType.Player),
+            [FactionType.A]: createFaction(FactionType.A),
+            [FactionType.B]: createFaction(FactionType.B),
+        },
         ecology: {
             treesToSpawn: 200,
         },
@@ -172,18 +184,24 @@ function load() {
         },
     })
 
-    loadTexture("character", "/textures/character.png")
+    loadTexture("faction-a", "/textures/faction-a.png")
+    loadTexture("faction-b", "/textures/faction-b.png")
     loadTexture("player", "/textures/player.png")
     loadTexture("town", "/textures/town.png")
     loadTexture("village", "/textures/village.png")
     loadTexture("forest", "/textures/forest.png")
 
-    addTown(24, 24)
-    addCharacter(16, 6)
-    addCharacter(36, 26)
+    addTown(44, 38)
+    addCharacter(16, 6, FactionType.A)
+    addCharacter(36, 26, FactionType.A)
+
+    addTown(80, 92)
+    addCharacter(83, 94, FactionType.B)
+    addCharacter(76, 88, FactionType.B)
+
     createVillage(30, 30)
 
-    player = addCharacter(20, 20, true)
+    player = addCharacter(20, 20, FactionType.Player)
 
     updateState({
         player,

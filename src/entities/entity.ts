@@ -5,8 +5,7 @@ import { Character } from "./character"
 
 export enum EntityType {
     Placeholder = 0,
-    Player,
-    Npc,
+    Character,
     Resource,
     Village,
     Town,

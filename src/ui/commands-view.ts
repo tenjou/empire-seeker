@@ -1,7 +1,7 @@
 import { HTMLComponent } from "./dom"
 
 const template = document.createElement("template")
-template.className = "absolute right top m-2"
+template.className = "absolute right bottom m-2"
 template.innerHTML = html`
     <button class="button">Build</button>
 `

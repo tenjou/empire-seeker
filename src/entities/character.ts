@@ -1,4 +1,4 @@
-import { getTexture } from "../assets/texture"
+import { FactionType, getFactionTexture } from "../factions/factions"
 import { Inventory, haveInventorySpace, sellInventory } from "../inventory"
 import { openPopup } from "../popup"
 import { getState } from "../state"
@@ -8,6 +8,7 @@ import { extractResource } from "./resource"
 export type AiState = "idle" | "move-to-target" | "search-wood" | "gather-resource" | "return-town" | "sell" | "enter" | "exit"
 
 export interface Character extends Entity {
+    factionType: FactionType
     startX: number
     startY: number
     endX: number
@@ -50,7 +51,7 @@ function handleStateEnter(character: Character, newState: AiState, tCurr: number
         case "enter": {
             character.isHidden = true
 
-            if (character.type === EntityType.Player) {
+            if (character.factionType === FactionType.Player) {
                 openPopup("settlement-popup", () => {
                     transitionAiState(character, "exit")
                 })
@@ -80,7 +81,7 @@ export function updateCharacterAi(character: Character, tCurr: number) {
 
     switch (ai.state) {
         case "idle": {
-            if (character.type === EntityType.Npc) {
+            if (character.factionType !== FactionType.Player) {
                 transitionAiState(character, "search-wood")
             } else {
                 ai.tUpdate = tCurr + 5000
@@ -161,7 +162,7 @@ export function updateCharacterAi(character: Character, tCurr: number) {
             if (character.inventory.spaceUsed > 0) {
                 transitionAiState(character, "sell", character.target)
             } else {
-                if (character.type !== EntityType.Player) {
+                if (character.factionType !== FactionType.Player) {
                     transitionAiState(character, "exit", character.target)
                 }
             }
@@ -205,16 +206,17 @@ export function transitionAiState(character: Character, newState: AiState, targe
 
 function handleEntityEvent(_from: Entity, _to: Entity, _event: EntityEvent) {}
 
-export function addCharacter(gridX: number, gridY: number, isPlayer = false) {
+export function addCharacter(gridX: number, gridY: number, factionType: FactionType) {
     const { characters } = getState()
 
     const character: Character = {
         id: characters.length + 1,
-        type: isPlayer ? EntityType.Player : EntityType.Npc,
-        texture: getTexture(isPlayer ? "player" : "character"),
+        type: EntityType.Character,
+        texture: getFactionTexture(factionType),
         x: gridX * GridSize,
         y: gridY * GridSize,
         isHidden: false,
+        factionType,
         startX: 0,
         startY: 0,
         endX: 0,
