@@ -1,18 +1,21 @@
 import { getTexture } from "../assets/texture"
+import { FactionType } from "../factions/factions"
 import { Inventory } from "../inventory"
 import { Entity, EntityType, GridSize, addEntity, createEntityId, fillData } from "./entity"
 
 export interface Town extends Entity {
+    factionType: FactionType
     inventory: Inventory
 }
 
-export function addTown(gridX: number, gridY: number) {
+export function addTown(gridX: number, gridY: number, factionType: FactionType) {
     const town: Town = {
         id: createEntityId(),
         texture: getTexture("town"),
         type: EntityType.Town,
         x: gridX * GridSize,
         y: gridY * GridSize,
+        factionType,
         subscribers: [],
         inventory: {
             items: [],

@@ -191,15 +191,14 @@ function load() {
     loadTexture("village", "/textures/village.png")
     loadTexture("forest", "/textures/forest.png")
 
-    addTown(44, 38)
+    addTown(44, 38, FactionType.A)
     addCharacter(16, 6, FactionType.A)
     addCharacter(36, 26, FactionType.A)
+    createVillage(30, 30, FactionType.A)
 
-    addTown(80, 92)
+    addTown(80, 92, FactionType.B)
     addCharacter(83, 94, FactionType.B)
     addCharacter(76, 88, FactionType.B)
-
-    createVillage(30, 30)
 
     player = addCharacter(20, 20, FactionType.Player)
 

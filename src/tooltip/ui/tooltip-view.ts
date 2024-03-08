@@ -1,8 +1,11 @@
 import { EmptyEntity, Entity, EntityType, Resource } from "../../entities/entity"
+import { Town } from "../../entities/town"
 import { Village } from "../../entities/village"
 import { HTMLComponent } from "../../ui/dom"
 import "./tooltip-resource"
 import { TooltipResourceElement } from "./tooltip-resource"
+import "./tooltip-town"
+import { TooltipTownElement } from "./tooltip-town"
 import "./tooltip-village"
 import { TooltipVillageElement } from "./tooltip-village"
 
@@ -40,6 +43,11 @@ export class TooltipView extends HTMLComponent {
                 break
             }
 
+            case EntityType.Town: {
+                ;(content.children[0] as TooltipTownElement).update(this.currEntity as Town)
+                break
+            }
+
             case EntityType.Village: {
                 ;(content.children[0] as TooltipVillageElement).update(this.currEntity as Village)
                 break
@@ -57,6 +65,12 @@ export class TooltipView extends HTMLComponent {
             case EntityType.Resource: {
                 const tooltipResource = new TooltipResourceElement()
                 content.appendChild(tooltipResource)
+                break
+            }
+
+            case EntityType.Town: {
+                const tooltipTown = new TooltipTownElement()
+                content.appendChild(tooltipTown)
                 break
             }
 

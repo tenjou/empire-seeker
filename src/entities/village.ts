@@ -1,9 +1,11 @@
 import { getTexture } from "../assets/texture"
+import { FactionType } from "../factions/factions"
 import { Inventory, addInventoryItem } from "../inventory"
 import { getState } from "../state"
 import { Entity, EntityType, GridSize, addEntity, createEntityId, fillData } from "./entity"
 
 export interface Village extends Entity {
+    factionType: FactionType
     tier: number
     population: number
     inventory: Inventory
@@ -12,7 +14,7 @@ export interface Village extends Entity {
 const VillageUpdateDelay = 5000
 const VillageProductionRate = 1
 
-export function createVillage(gridX: number, gridY: number) {
+export function createVillage(gridX: number, gridY: number, factionType: FactionType) {
     const village: Village = {
         id: createEntityId(),
         subscribers: [],
@@ -21,6 +23,7 @@ export function createVillage(gridX: number, gridY: number) {
         x: gridX * GridSize,
         y: gridY * GridSize,
 
+        factionType,
         tier: 1,
         population: 4,
         inventory: {
