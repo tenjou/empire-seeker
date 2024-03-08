@@ -28,6 +28,6 @@ export function getFactionTexture(type: FactionType) {
 export function createFaction(type: FactionType): Faction {
     return {
         type,
-        gold: 0,
+        gold: 100,
     }
 }

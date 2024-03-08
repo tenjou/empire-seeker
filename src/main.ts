@@ -218,6 +218,9 @@ function loadUI() {
 
     loadTooltip()
     loadPopups()
+
+    const infoView = getElement<InfoView>("info-view")
+    infoView.updateFaction()
 }
 
 function update() {
