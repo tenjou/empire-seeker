@@ -57,15 +57,21 @@ export function addTree(gridX: number, gridY: number) {
 export function getResourceAt(gridX: number, gridY: number) {
     const { data, resources } = getState()
 
-    const index = (gridX + gridY * MapSize) * 2
-    const entityId = data[index + 1]
-    if (!entityId) {
+    const index = gridX + gridY * MapSize
+    const value = data[index]
+    if (!value) {
         return null
     }
 
-    const entity = resources[entityId - 1]
+    const entityType = value >>> 24
+    if (entityType !== EntityType.Resource) {
+        return null
+    }
 
-    return entity && entity.type === EntityType.Resource ? entity : null
+    const entityId = value & 0xffffff
+    const entity = resources[entityId]
+
+    return entity || null
 }
 
 export function findClosestResource(gridX: number, gridY: number, itemId: InventoryItemId) {

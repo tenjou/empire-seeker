@@ -8,7 +8,7 @@ interface GameState {
     resources: Resource[]
     resourcesToRespawn: number[]
     towns: Town[]
-    data: Uint16Array
+    data: Int32Array
     factions: Faction[]
     ecology: {
         treesToSpawn: number

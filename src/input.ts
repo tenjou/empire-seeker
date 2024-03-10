@@ -1,7 +1,8 @@
-import { getEntityTypeAt, EntityType, Entity } from "./entities/entity"
+import { getEntityTypeAt, EntityType, Entity, getEntityAt } from "./entities/entity"
 import { getResourceAt } from "./entities/resource"
 import { getTownAt } from "./entities/town"
 import { MapWidth, MapHeight, GridSize } from "./map"
+import { updateEntityTooltip } from "./tooltip/tooltip"
 import { App } from "./types"
 import { getElement } from "./ui/dom"
 import { InfoView } from "./ui/info-view"
@@ -78,32 +79,11 @@ export function loadInput(app: App) {
         const gridY = (posY / GridSize) | 0
         getElement<InfoView>("info-view").updateCoords(gridX, gridY)
 
-        updateHoverEntity(gridX, gridY)
-
+        hoverEntity = getEntityAt(gridX, gridY)
         document.body.style.cursor = hoverEntity ? "pointer" : "auto"
+
+        updateEntityTooltip(hoverEntity)
     })
-}
-
-export function updateHoverEntity(gridX: number, gridY: number) {
-    const entityType = getEntityTypeAt(gridX, gridY)
-    if (!entityType) {
-        hoverEntity = null
-        return
-    }
-
-    switch (entityType) {
-        case EntityType.Resource:
-            hoverEntity = getResourceAt(gridX, gridY)
-            break
-
-        case EntityType.Town:
-            hoverEntity = getTownAt(gridX, gridY)
-            break
-
-        default:
-            hoverEntity = null
-            break
-    }
 }
 
 export function getHoverEntity() {

@@ -124,7 +124,7 @@ function heroStateEnter(hero: Hero) {
             const index = town.heroes.findIndex((heroId) => heroId === hero.id)
             if (index === -1) {
                 hero.actionEnd += 5000
-                console.error(`Failed to find town at ${hero.gridX}, ${hero.gridY}`)
+                console.error(`Failed to find hero in town:`, town)
                 return
             }
 

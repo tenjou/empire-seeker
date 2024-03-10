@@ -21,7 +21,6 @@ export function addTown(gridX: number, gridY: number, factionId: FactionId) {
     const { towns } = getState()
 
     const hero = createHero(gridX, gridY, factionId)
-    const hero2 = createHero(gridX, gridY, factionId)
 
     const town: Town = {
         id: towns.length,
@@ -38,7 +37,7 @@ export function addTown(gridX: number, gridY: number, factionId: FactionId) {
             food: 0,
             wood: 0,
         },
-        heroes: [hero.id, hero2.id],
+        heroes: [hero.id],
     }
 
     towns.push(town)
@@ -77,15 +76,21 @@ export function updateTowns() {
 export function getTownAt(gridX: number, gridY: number) {
     const { data, towns } = getState()
 
-    const index = (gridX + gridY * MapSize) * 2
-    const entityId = data[index + 1]
-    if (!entityId) {
+    const index = gridX + gridY * MapSize
+    const value = data[index]
+    if (!value) {
         return null
     }
 
-    const entity = towns[entityId - 1]
+    const entityType = value >>> 24
+    if (entityType !== EntityType.Town) {
+        return null
+    }
 
-    return entity && entity.type === EntityType.Town ? entity : null
+    const entityId = value & 0xffffff
+    const entity = towns[entityId]
+
+    return entity || null
 }
 
 export function findClosestTown(hero: Hero) {

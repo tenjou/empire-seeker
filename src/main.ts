@@ -1,12 +1,10 @@
 import { loadTexture } from "./assets/texture"
 import { updateResourceSpawns } from "./ecology"
-import { Entity, EntityType, getEntityTypeAt } from "./entities/entity"
-import { getResourceAt } from "./entities/resource"
-import { addTown, getTownAt, updateTowns } from "./entities/town"
+import { addTown, updateTowns } from "./entities/town"
 import { createFaction } from "./factions/factions"
 import { updateHeroes } from "./hero/hero"
 import { loadInput } from "./input"
-import { GridSize, MapHeight, MapSize, MapWidth } from "./map"
+import { MapHeight, MapSize, MapWidth } from "./map"
 import { loadPopups } from "./popup"
 import { loadRenderer, render } from "./renderer"
 import { getState, loadState } from "./state"
@@ -76,7 +74,7 @@ function load() {
         resources: [],
         resourcesToRespawn: [],
         towns: [],
-        data: new Uint16Array(MapSize * MapSize * 2),
+        data: new Int32Array(MapSize * MapSize),
         factions: [],
         ecology: {
             treesToSpawn: 100,

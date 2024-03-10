@@ -1,4 +1,6 @@
-import { EntityType } from "../../entities/entity"
+import { EmptyEntity, Entity, EntityType } from "../../entities/entity"
+import { Resource } from "../../entities/resource"
+import { Town } from "../../entities/town"
 import { HTMLComponent } from "../../ui/dom"
 import "./tooltip-resource"
 import { TooltipResourceElement } from "./tooltip-resource"
@@ -14,37 +16,38 @@ template.innerHTML = html`
 `
 
 export class TooltipView extends HTMLComponent {
+    currEntity = EmptyEntity
+
     constructor() {
         super(template)
     }
 
-    update() {
-        // if (this.currEntity.type !== entity.type) {
-        //     this.updateContentElement(entity)
-        //     this.setText("#name", EntityType[entity.type])
-        // }
-        // this.currEntity = entity
-        // this.updateContent()
+    update(entity: Entity) {
+        if (this.currEntity.type !== entity.type) {
+            this.updateContentElement(entity)
+            this.setText("#name", EntityType[entity.type])
+        }
+        this.currEntity = entity
+        this.updateContent()
     }
 
     updateContent() {
         const content = this.getElement("#content")
 
-        // switch (this.currEntity.type) {
-        //     case EntityType.Resource: {
-        //         ;(content.children[0] as TooltipResourceElement).update(this.currEntity as Resource)
-        //         break
-        //     }
+        switch (this.currEntity.type) {
+            case EntityType.Resource: {
+                ;(content.children[0] as TooltipResourceElement).update(this.currEntity as Resource)
+                break
+            }
 
-        //     case EntityType.Town: {
-        //         ;(content.children[0] as TooltipTownElement).update(this.currEntity as Town)
-        //         break
-        //     }
-
-        // }
+            case EntityType.Town: {
+                ;(content.children[0] as TooltipTownElement).update(this.currEntity as Town)
+                break
+            }
+        }
     }
 
-    updateContentElement(entity: EntityOld) {
+    updateContentElement(entity: Entity) {
         const content = this.getElement("#content")
         if (content.children.length) {
             content.removeChild(content.children[0])
