@@ -25,7 +25,7 @@ export class ActionView extends HTMLComponent {
             if (entityType) {
                 this.setText("", `${hero.state}: ${EntityType[entityType]}`)
             } else {
-                this.setText("", `${hero.state}: ${hero.gridX | 0}, ${hero.gridY | 0}`)
+                this.setText("", `${hero.state}: ${hero.targetGridX | 0}, ${hero.targetGridY | 0}`)
             }
         } else {
             this.setText("", hero.state)
