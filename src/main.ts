@@ -1,14 +1,17 @@
 import { loadTexture } from "./assets/texture"
 import { updateResourceSpawns } from "./ecology"
-import { addTown, updateTowns } from "./entities/town"
+import { Entity, EntityType, getEntityTypeAt } from "./entities/entity"
+import { getResourceAt } from "./entities/resource"
+import { addTown, getTownAt, updateTowns } from "./entities/town"
 import { createFaction } from "./factions/factions"
 import { updateHeroes } from "./hero/hero"
-import { GridSize, MapSize } from "./map"
+import { loadInput } from "./input"
+import { GridSize, MapHeight, MapSize, MapWidth } from "./map"
 import { loadPopups } from "./popup"
-import { render } from "./renderer"
+import { loadRenderer, render } from "./renderer"
 import { getState, loadState } from "./state"
 import "./style.css"
-import { loadTooltip, updateEntityTooltip } from "./tooltip/tooltip"
+import { loadTooltip } from "./tooltip/tooltip"
 import "./trading/ui/trading-popup"
 import { App, Camera } from "./types"
 import "./ui/action-view"
@@ -24,8 +27,6 @@ import "./ui/settlement-popup"
 const app: App = {
     canvas: {} as HTMLCanvasElement,
     ctx: {} as CanvasRenderingContext2D,
-    mapWidth: 0,
-    mapHeight: 0,
     camera: {
         x: 0,
         y: 0,
@@ -35,9 +36,6 @@ const app: App = {
 }
 
 let tPrev = 0
-let isHolding = false
-let isDragging = false
-let draggingAccumulator = 0
 
 function setup() {
     const parent = document.getElementById("app")!
@@ -61,75 +59,7 @@ function setup() {
     app.canvas = canvas
     app.ctx = ctx
     app.camera = camera
-    app.mapWidth = MapSize * GridSize
-    app.mapHeight = MapSize * GridSize
 
-    window.addEventListener("mousedown", (event) => {
-        if (event.button === 0) {
-            isHolding = true
-        }
-    })
-    window.addEventListener("mouseup", (event) => {
-        if (event.button === 0) {
-            isHolding = false
-        }
-
-        if (isDragging && event.button === 0) {
-            isDragging = false
-            draggingAccumulator = 0
-            return
-        }
-
-        // const { player } = getState()
-
-        // const posX = event.clientX + app.camera.x
-        // const posY = event.clientY + app.camera.y
-        // const gridX = (posX / GridSize) | 0
-        // const gridY = (posY / GridSize) | 0
-
-        // const target = getEntityAt(gridX, gridY)
-        // if (target) {
-        //     transitionAiState(player, "move-to-target", target)
-        // } else {
-        //     targetEntity.x = gridX * GridSize
-        //     targetEntity.y = gridY * GridSize
-        //     transitionAiState(player, "move-to-target", targetEntity, true)
-        // }
-    })
-    window.addEventListener("mousemove", (event) => {
-        if (isHolding) {
-            const { mapWidth, mapHeight } = app
-
-            draggingAccumulator += Math.abs(event.movementX) + Math.abs(event.movementY)
-            camera.x -= event.movementX
-            camera.y -= event.movementY
-
-            if (camera.x < 0) {
-                camera.x = 0
-            } else if (camera.x + camera.width >= mapWidth) {
-                camera.x = mapWidth - camera.width
-            }
-
-            if (camera.y < 0) {
-                camera.y = 0
-            } else if (camera.y + camera.height >= mapHeight) {
-                camera.y = mapHeight - camera.height
-            }
-
-            if (draggingAccumulator >= 5) {
-                isDragging = true
-                return
-            }
-        }
-
-        const posX = event.clientX + app.camera.x
-        const posY = event.clientY + app.camera.y
-        const gridX = (posX / GridSize) | 0
-        const gridY = (posY / GridSize) | 0
-        getElement<InfoView>("info-view").updateCoords(gridX, gridY)
-
-        updateEntityTooltip(gridX, gridY)
-    })
     window.addEventListener("resize", () => {
         canvas.width = parent.clientWidth
         canvas.height = parent.clientHeight
@@ -139,6 +69,8 @@ function setup() {
 }
 
 function load() {
+    loadInput(app)
+
     loadState({
         heroes: [],
         resources: [],
@@ -162,6 +94,8 @@ function load() {
     loadTexture("town", "/textures/town.png")
     loadTexture("village", "/textures/village.png")
     loadTexture("tree", "/textures/tree.png")
+
+    loadRenderer()
 
     createFaction("Player")
     createFaction("A")
@@ -213,21 +147,9 @@ function renderMain() {
 
     ctx.strokeStyle = "#000"
     ctx.lineWidth = 3
-    ctx.strokeRect(0.5, 0.5, app.mapWidth, app.mapHeight)
+    ctx.strokeRect(0.5, 0.5, MapWidth, MapHeight)
 
     render(app)
-
-    // if (hoverEntity) {
-    //     const size = hoverEntity.type === EntityType.Town ? 2 : 1
-    //     const startX = hoverEntity.x - 2
-    //     const startY = hoverEntity.y - 2
-    //     const endX = size * GridSize + 4
-    //     const endY = size * GridSize + 4
-
-    //     ctx.strokeStyle = "white"
-    //     ctx.lineWidth = 2
-    //     ctx.strokeRect(startX, startY, endX, endY)
-    // }
 
     ctx.restore()
 

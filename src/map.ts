@@ -3,6 +3,8 @@ import { getState } from "./state"
 
 export const GridSize = 16
 export const MapSize = 100
+export const MapWidth = MapSize * GridSize
+export const MapHeight = MapSize * GridSize
 
 export function placeEntity(entity: Entity) {
     const { data } = getState()

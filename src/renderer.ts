@@ -1,7 +1,8 @@
 import { Texture, getTexture } from "./assets/texture"
 import { EntityType } from "./entities/entity"
 import { Hero } from "./hero/hero"
-import { GridSize, MapSize } from "./map"
+import { getHoverEntity } from "./input"
+import { GridSize } from "./map"
 import { getState } from "./state"
 import { App } from "./types"
 
@@ -14,35 +15,26 @@ export interface Sprite {
 
 const sprites: Sprite[] = []
 
+const texturesMap: Record<number, Texture> = {}
+const drawBuffer: Int32Array = new Int32Array(2048)
+let numItems = 0
+
+export function loadRenderer() {
+    texturesMap[EntityType.Resource] = getTexture("tree")
+    texturesMap[EntityType.Town] = getTexture("town")
+}
+
 export function render(app: App) {
-    const { data, time } = getState()
+    const { time } = getState()
+    const { ctx } = app
 
-    const startX = Math.floor(app.camera.x / GridSize)
-    const startY = Math.floor(app.camera.y / GridSize)
-    const endX = Math.floor((app.camera.x + app.camera.width) / GridSize)
-    const endY = Math.floor((app.camera.y + app.camera.height) / GridSize)
+    updateRenderer(app)
 
-    const treeTexture = getTexture("tree")
-    const townTexture = getTexture("town")
-
-    for (let y = startY; y < endY; y += 1) {
-        for (let x = startX; x < endX; x += 1) {
-            const index = (x + y * MapSize) * 2
-            const entityId = data[index]
-            if (!entityId) {
-                continue
-            }
-
-            const entityType = data[index]
-            const posX = x * GridSize
-            const posY = y * GridSize
-
-            if (entityType === EntityType.Resource) {
-                app.ctx.drawImage(treeTexture.img, posX, posY)
-            } else {
-                app.ctx.drawImage(townTexture.img, posX, posY)
-            }
-        }
+    for (let n = 0; n < numItems; n += 3) {
+        const texture = texturesMap[drawBuffer[n]]
+        const x = drawBuffer[n + 1]
+        const y = drawBuffer[n + 2]
+        ctx.drawImage(texture.img, x, y)
     }
 
     for (const sprite of sprites) {
@@ -59,7 +51,53 @@ export function render(app: App) {
             sprite.y = entity.targetGridY * GridSize
         }
 
-        app.ctx.drawImage(sprite.texture.img, sprite.x, sprite.y)
+        ctx.drawImage(sprite.texture.img, sprite.x, sprite.y)
+    }
+
+    const hoverEntity = getHoverEntity()
+    if (hoverEntity) {
+        const size = hoverEntity.type === EntityType.Town ? 2 : 1
+        const startX = hoverEntity.gridX * GridSize - 2
+        const startY = hoverEntity.gridY * GridSize - 2
+        const endX = size * GridSize + 4
+        const endY = size * GridSize + 4
+
+        ctx.strokeStyle = "white"
+        ctx.lineWidth = 2
+        ctx.strokeRect(startX, startY, endX, endY)
+    }
+}
+
+function updateRenderer(app: App) {
+    const { resources, towns } = getState()
+
+    numItems = 0
+
+    const startX = Math.floor(app.camera.x / GridSize) - 1
+    const startY = Math.floor(app.camera.y / GridSize) - 1
+    const endX = Math.floor((app.camera.x + app.camera.width) / GridSize) + 1
+    const endY = Math.floor((app.camera.y + app.camera.height) / GridSize) + 1
+
+    for (const resource of resources) {
+        if (resource.gridX < startX || resource.gridX > endX || resource.gridY < startY || resource.gridY > endY) {
+            continue
+        }
+
+        drawBuffer[numItems] = resource.type
+        drawBuffer[numItems + 1] = resource.gridX * GridSize
+        drawBuffer[numItems + 2] = resource.gridY * GridSize
+        numItems += 3
+    }
+
+    for (const town of towns) {
+        if (town.gridX < startX || town.gridX > endX || town.gridY < startY || town.gridY > endY) {
+            continue
+        }
+
+        drawBuffer[numItems] = town.type
+        drawBuffer[numItems + 1] = town.gridX * GridSize
+        drawBuffer[numItems + 2] = town.gridY * GridSize
+        numItems += 3
     }
 }
 

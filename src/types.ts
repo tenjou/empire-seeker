@@ -12,7 +12,5 @@ export interface Camera {
 export interface App {
     canvas: HTMLCanvasElement
     ctx: CanvasRenderingContext2D
-    mapWidth: number
-    mapHeight: number
     camera: Camera
 }
