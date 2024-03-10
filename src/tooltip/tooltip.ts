@@ -16,6 +16,8 @@ export function updateEntityTooltip(entity: Entity | null) {
 
     prevEntity = entity
 
+    document.body.style.cursor = entity ? "pointer" : "auto"
+
     if (!entity) {
         tooltipElement.classList.add("hide")
         return
@@ -25,11 +27,6 @@ export function updateEntityTooltip(entity: Entity | null) {
     tooltipElement.classList.remove("hide")
 }
 
-// function handleEntityEvent(_from: EntityOld, _to: EntityOld, event: EntityEvent) {
-//     if (event === "destroyed") {
-//         showEntityTooltip(null)
-//         return
-//     }
-
-//     tooltipElement.updateContent()
-// }
+export function updateTooltipContent() {
+    tooltipElement.updateContent()
+}

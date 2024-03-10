@@ -1,7 +1,9 @@
 import { Hero, HeroId } from "../hero/hero"
+import { getHoverEntity } from "../input"
 import { InventoryItemId, addInventoryItem } from "../inventory"
 import { MapSize, clearEntity, placeEntity } from "../map"
 import { getState } from "../state"
+import { updateEntityTooltip, updateTooltipContent } from "../tooltip/tooltip"
 import { randomNumber } from "../utils"
 import { Entity, EntityType } from "./entity"
 
@@ -25,6 +27,14 @@ export function extractResource(hero: Hero, resource: Resource) {
     }
 
     addInventoryItem(hero, resource.itemId, consumed)
+
+    if (getHoverEntity() === resource) {
+        if (resource.amount <= 0) {
+            updateEntityTooltip(null)
+        } else {
+            updateTooltipContent()
+        }
+    }
 }
 
 export function addTree(gridX: number, gridY: number) {

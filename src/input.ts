@@ -1,7 +1,5 @@
-import { getEntityTypeAt, EntityType, Entity, getEntityAt } from "./entities/entity"
-import { getResourceAt } from "./entities/resource"
-import { getTownAt } from "./entities/town"
-import { MapWidth, MapHeight, GridSize } from "./map"
+import { Entity, getEntityAt } from "./entities/entity"
+import { GridSize, MapHeight, MapWidth } from "./map"
 import { updateEntityTooltip } from "./tooltip/tooltip"
 import { App } from "./types"
 import { getElement } from "./ui/dom"
@@ -29,6 +27,7 @@ export function loadInput(app: App) {
         if (isDragging && event.button === 0) {
             isDragging = false
             draggingAccumulator = 0
+
             return
         }
 
@@ -80,8 +79,6 @@ export function loadInput(app: App) {
         getElement<InfoView>("info-view").updateCoords(gridX, gridY)
 
         hoverEntity = getEntityAt(gridX, gridY)
-        document.body.style.cursor = hoverEntity ? "pointer" : "auto"
-
         updateEntityTooltip(hoverEntity)
     })
 }
