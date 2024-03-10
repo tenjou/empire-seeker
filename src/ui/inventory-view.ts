@@ -1,8 +1,5 @@
-import { EmptyEntity, subscribe } from "../entities/entity"
-import { getState } from "../state"
 import { HTMLComponent } from "./dom"
 import "./inventory-item"
-import { InventoryItemElement } from "./inventory-item"
 
 const template = document.createElement("template")
 template.className = "absolute left bottom p-2 m-2 width-160px bg-black-blended color-white border-radius"
@@ -23,28 +20,24 @@ export class InventoryView extends HTMLComponent {
     connectedCallback(): void {
         super.connectedCallback()
 
-        const { player } = getState()
+        // const { player } = getState()
 
-        subscribe(player, EmptyEntity, () => this.update())
+        // subscribe(player, EmptyEntity, () => this.update())
 
         this.update()
     }
 
     update() {
-        const { player } = getState()
-
-        const inventory = player.inventory
-
-        const container = this.getElement("#items")
-        this.syncElementEntries("inventory-item", inventory.items.length, container)
-
-        for (let n = 0; n < inventory.items.length; n += 1) {
-            const item = inventory.items[n]
-            const element = container.children[n] as InventoryItemElement
-            element.update(item)
-        }
-
-        this.setText("#space", `${inventory.spaceUsed} / ${inventory.spaceMax}`)
+        // const { player } = getState()
+        // const inventory = player.inventory
+        // const container = this.getElement("#items")
+        // this.syncElementEntries("inventory-item", inventory.items.length, container)
+        // for (let n = 0; n < inventory.items.length; n += 1) {
+        //     const item = inventory.items[n]
+        //     const element = container.children[n] as InventoryItemElement
+        //     element.update(item)
+        // }
+        // this.setText("#space", `${inventory.spaceUsed} / ${inventory.spaceMax}`)
     }
 }
 

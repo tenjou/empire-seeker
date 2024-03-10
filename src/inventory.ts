@@ -1,4 +1,4 @@
-import { Entity, emit } from "./entities/entity"
+import { Hero } from "./hero/hero"
 
 export type InventoryItemId = "wood" | "grain"
 
@@ -13,7 +13,9 @@ export interface Inventory {
     spaceMax: number
 }
 
-export function addInventoryItem(entity: Entity, inventory: Inventory, itemId: InventoryItemId, amountAdd: number) {
+export function addInventoryItem(entity: Hero, itemId: InventoryItemId, amountAdd: number) {
+    const { inventory } = entity
+
     const spaceLeft = inventory.spaceMax - inventory.spaceUsed
     const amount = Math.min(spaceLeft, amountAdd)
 
@@ -28,13 +30,6 @@ export function addInventoryItem(entity: Entity, inventory: Inventory, itemId: I
     }
 
     inventory.spaceUsed += amount
-
-    emit(entity, "inventory-updated")
-}
-
-export function sellInventory(inventory: Inventory) {
-    inventory.items.length = 0
-    inventory.spaceUsed = 0
 }
 
 export function haveInventorySpace(inventory: Inventory, amount: number) {

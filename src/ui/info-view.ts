@@ -1,4 +1,3 @@
-import { FactionType } from "../factions/factions"
 import { getState } from "../state"
 import { HTMLComponent } from "./dom"
 
@@ -20,7 +19,7 @@ export class InfoView extends HTMLComponent {
     updateFaction() {
         const { factions } = getState()
 
-        const faction = factions[FactionType.Player]
+        const faction = factions[0]
 
         this.setText("#gold", faction.gold)
     }

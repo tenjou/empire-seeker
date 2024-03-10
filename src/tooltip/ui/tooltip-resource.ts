@@ -1,4 +1,4 @@
-import { Resource } from "../../entities/entity"
+import { Resource } from "../../entities/resource"
 import { HTMLComponent } from "../../ui/dom"
 
 const template = document.createElement("template")

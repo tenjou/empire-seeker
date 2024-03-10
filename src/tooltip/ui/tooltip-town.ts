@@ -1,5 +1,5 @@
 import { Town } from "../../entities/town"
-import { FactionType } from "../../factions/factions"
+import { getState } from "../../state"
 import { HTMLComponent } from "../../ui/dom"
 
 const template = document.createElement("template")
@@ -17,7 +17,11 @@ export class TooltipTownElement extends HTMLComponent {
     }
 
     update(town: Town) {
-        this.setText("#faction", FactionType[town.factionType])
+        const { factions } = getState()
+
+        const faction = factions[town.factionId]
+
+        this.setText("#faction", faction.name)
     }
 }
 

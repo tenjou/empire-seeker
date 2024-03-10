@@ -1,15 +1,19 @@
-import { EmptyEntity, Entity, EntityEvent, subscribe, unsubscribe } from "../entities/entity"
 import "./ui/tooltip-view"
 import { TooltipView } from "./ui/tooltip-view"
 
 let tooltipElement: TooltipView = {} as TooltipView
-let prevEntity: Entity | null = null
 
 export function loadTooltip() {
     tooltipElement = document.querySelector("tooltip-view") as TooltipView
 }
 
-export function showEntityTooltip(entity: Entity | null) {
+export function updateEntityTooltip(gridX: number, gridY: number) {
+    // hoverEntity = getEntityAt(gridX, gridY)
+    // updateEntityTooltip(hoverEntity)
+    // document.body.style.cursor = hoverEntity ? "pointer" : "auto"
+}
+
+export function showEntityTooltip(entity: EntityOld | null) {
     if (prevEntity === entity) {
         return
     }
@@ -30,7 +34,7 @@ export function showEntityTooltip(entity: Entity | null) {
     tooltipElement.classList.remove("hide")
 }
 
-function handleEntityEvent(_from: Entity, _to: Entity, event: EntityEvent) {
+function handleEntityEvent(_from: EntityOld, _to: EntityOld, event: EntityEvent) {
     if (event === "destroyed") {
         showEntityTooltip(null)
         return

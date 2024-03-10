@@ -1,33 +1,24 @@
-import { getTexture } from "../assets/texture"
+import { getState } from "../state"
+import { Brand } from "../types"
 
-export enum FactionType {
-    Neutral = 0,
-    Player,
-    A,
-    B,
-}
+export type FactionId = Brand<number, "faction_id">
 
 export interface Faction {
-    type: FactionType
+    factionId: FactionId
+    name: string
     gold: number
 }
 
-export function getFactionTexture(type: FactionType) {
-    switch (type) {
-        case FactionType.A:
-            return getTexture("faction-a")
-        case FactionType.B:
-            return getTexture("faction-b")
-        case FactionType.Player:
-            return getTexture("player")
-    }
+export function createFaction(name: string): Faction {
+    const { factions } = getState()
 
-    return getTexture("neutral")
-}
-
-export function createFaction(type: FactionType): Faction {
-    return {
-        type,
+    const faction: Faction = {
+        factionId: factions.length,
+        name,
         gold: 100,
     }
+
+    factions.push(faction)
+
+    return faction
 }

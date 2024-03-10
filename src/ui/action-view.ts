@@ -1,5 +1,3 @@
-import { EmptyEntity, EntityType, subscribe } from "../entities/entity"
-import { getState } from "../state"
 import { HTMLComponent } from "./dom"
 
 const template = document.createElement("template")
@@ -12,24 +10,20 @@ export class ActionView extends HTMLComponent {
     }
 
     connectedCallback(): void {
-        super.connectedCallback()
-
-        const { player } = getState()
-
-        subscribe(player, EmptyEntity, () => this.update())
-
-        this.update()
+        // super.connectedCallback()
+        // const { player } = getState()
+        // subscribe(player, EmptyEntity, () => this.update())
+        // this.update()
     }
 
     update() {
-        const { player } = getState()
-        const { ai } = player
-
-        if (ai.state === "move-to-target" && player.target) {
-            this.setText("", `${ai.state}: ${EntityType[player.target.type]}`)
-        } else {
-            this.setText("", ai.state)
-        }
+        //     const { player } = getState()
+        //     const { ai } = player
+        //     if (ai.state === "move-to-target" && player.target) {
+        //         this.setText("", `${ai.state}: ${EntityType[player.target.type]}`)
+        //     } else {
+        //         this.setText("", ai.state)
+        //     }
     }
 }
 

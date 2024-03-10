@@ -1,19 +1,21 @@
-import { Character } from "./entities/character"
-import { Entity } from "./entities/entity"
-import { Faction, FactionType } from "./factions/factions"
+import { Resource } from "./entities/resource"
+import { Town } from "./entities/town"
+import { Faction } from "./factions/factions"
+import { Hero } from "./hero/hero"
 
 interface GameState {
-    entities: Entity[]
-    characters: Character[]
-    entitiesMap: Record<number, Entity>
+    heroes: Hero[]
+    resources: Resource[]
+    resourcesToRespawn: number[]
+    towns: Town[]
     data: Uint16Array
-    player: Character
-    factions: Record<FactionType, Faction>
+    factions: Faction[]
     ecology: {
         treesToSpawn: number
     }
     time: {
         curr: number
+        townUpdate: number
         villageUpdate: number
     }
 }
