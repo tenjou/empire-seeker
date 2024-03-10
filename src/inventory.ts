@@ -1,5 +1,3 @@
-import { Hero } from "./hero/hero"
-
 export type InventoryItemId = "wood" | "grain"
 
 export interface InventoryItem {
@@ -13,9 +11,7 @@ export interface Inventory {
     spaceMax: number
 }
 
-export function addInventoryItem(entity: Hero, itemId: InventoryItemId, amountAdd: number) {
-    const { inventory } = entity
-
+export function addInventoryItem(inventory: Inventory, itemId: InventoryItemId, amountAdd: number) {
     const spaceLeft = inventory.spaceMax - inventory.spaceUsed
     const amount = Math.min(spaceLeft, amountAdd)
 

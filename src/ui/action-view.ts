@@ -1,3 +1,5 @@
+import { EntityType, getEntityTypeAt } from "../entities/entity"
+import { getSelectedHero } from "../hero/hero-controller"
 import { HTMLComponent } from "./dom"
 
 const template = document.createElement("template")
@@ -10,20 +12,24 @@ export class ActionView extends HTMLComponent {
     }
 
     connectedCallback(): void {
-        // super.connectedCallback()
-        // const { player } = getState()
-        // subscribe(player, EmptyEntity, () => this.update())
-        // this.update()
+        super.connectedCallback()
+
+        this.update()
     }
 
     update() {
-        //     const { player } = getState()
-        //     const { ai } = player
-        //     if (ai.state === "move-to-target" && player.target) {
-        //         this.setText("", `${ai.state}: ${EntityType[player.target.type]}`)
-        //     } else {
-        //         this.setText("", ai.state)
-        //     }
+        const hero = getSelectedHero()
+
+        if (hero.state === "move-to-target") {
+            const entityType = getEntityTypeAt(hero.targetGridX, hero.targetGridY)
+            if (entityType) {
+                this.setText("", `${hero.state}: ${EntityType[entityType]}`)
+            } else {
+                this.setText("", `${hero.state}: ${hero.gridX | 0}, ${hero.gridY | 0}`)
+            }
+        } else {
+            this.setText("", hero.state)
+        }
     }
 }
 

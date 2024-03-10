@@ -1,4 +1,5 @@
 import { Entity, getEntityAt } from "./entities/entity"
+import { moveSelectedHeroTo } from "./hero/hero-controller"
 import { GridSize, MapHeight, MapWidth } from "./map"
 import { updateEntityTooltip } from "./tooltip/tooltip"
 import { App } from "./types"
@@ -33,10 +34,11 @@ export function loadInput(app: App) {
 
         // const { player } = getState()
 
-        // const posX = event.clientX + app.camera.x
-        // const posY = event.clientY + app.camera.y
-        // const gridX = (posX / GridSize) | 0
-        // const gridY = (posY / GridSize) | 0
+        const posX = event.clientX + app.camera.x
+        const posY = event.clientY + app.camera.y
+        const gridX = (posX / GridSize) | 0
+        const gridY = (posY / GridSize) | 0
+        moveSelectedHeroTo(gridX, gridY)
 
         // const target = getEntityAt(gridX, gridY)
         // if (target) {

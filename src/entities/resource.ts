@@ -1,9 +1,11 @@
 import { Hero, HeroId } from "../hero/hero"
+import { getSelectedHero } from "../hero/hero-controller"
 import { getHoverEntity } from "../input"
 import { InventoryItemId, addInventoryItem } from "../inventory"
 import { MapSize, clearEntity, placeEntity } from "../map"
 import { getState } from "../state"
 import { updateEntityTooltip, updateTooltipContent } from "../tooltip/tooltip"
+import { updateInventoryUI } from "../ui/ui"
 import { randomNumber } from "../utils"
 import { Entity, EntityType } from "./entity"
 
@@ -13,7 +15,7 @@ export interface Resource extends Entity {
     targetedBy: HeroId
 }
 
-export function extractResource(hero: Hero, resource: Resource) {
+export function gatherResource(hero: Hero, resource: Resource) {
     const consumed = Math.min(resource.amount, 1)
     resource.amount -= consumed
 
@@ -26,7 +28,7 @@ export function extractResource(hero: Hero, resource: Resource) {
         ecology.treesToSpawn += 1
     }
 
-    addInventoryItem(hero, resource.itemId, consumed)
+    addInventoryItem(hero.inventory, resource.itemId, consumed)
 
     if (getHoverEntity() === resource) {
         if (resource.amount <= 0) {
@@ -34,6 +36,10 @@ export function extractResource(hero: Hero, resource: Resource) {
         } else {
             updateTooltipContent()
         }
+    }
+
+    if (getSelectedHero() === hero) {
+        updateInventoryUI()
     }
 }
 

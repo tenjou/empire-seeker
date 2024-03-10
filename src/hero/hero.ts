@@ -1,20 +1,27 @@
-import { Entity, EntityType, getEntityTypeAt } from "../entities/entity"
-import { extractResource, findClosestResource, getResourceAt } from "../entities/resource"
+import { EntityType, getEntityTypeAt } from "../entities/entity"
+import { findClosestResource, gatherResource, getResourceAt } from "../entities/resource"
 import { findClosestTown, getTownAt } from "../entities/town"
 import { FactionId } from "../factions/factions"
 import { Inventory, InventoryItemId } from "../inventory"
+import { openPopup } from "../popup"
 import { addSprite, removeSprite } from "../renderer"
 import { getState } from "../state"
 import { Brand } from "../types"
+import { updateActionUI } from "../ui/ui"
+import { getSelectedHero } from "./hero-controller"
 
 type AiState = "idle" | "station" | "move-to-target" | "search-resource" | "gather-resource" | "return-town" | "sell" | "enter" | "exit"
+
+interface ControlledJob {
+    type: "controlled"
+}
 
 interface GatherResourceJob {
     type: "gather-resource"
     itemId: InventoryItemId
 }
 
-type Job = GatherResourceJob
+type Job = ControlledJob | GatherResourceJob
 
 export type HeroId = Brand<number, "hero_id">
 
@@ -33,7 +40,7 @@ export interface Hero {
     job: Job | null
 }
 
-export function createHero(gridX: number, gridY: number, factionId: FactionId) {
+export function createHero(gridX: number, gridY: number, factionId: FactionId, defaultState: AiState = "station") {
     const { heroes } = getState()
 
     const hero: Hero = {
@@ -43,8 +50,8 @@ export function createHero(gridX: number, gridY: number, factionId: FactionId) {
         gridY,
         targetGridX: gridX,
         targetGridY: gridY,
-        state: "enter",
-        statePrev: "enter",
+        state: defaultState,
+        statePrev: defaultState,
         actionStart: 0,
         actionEnd: 0,
         inventory: {
@@ -56,6 +63,10 @@ export function createHero(gridX: number, gridY: number, factionId: FactionId) {
     }
 
     heroes.push(hero)
+
+    if (defaultState !== "station") {
+        addSprite(hero)
+    }
 
     return hero
 }
@@ -77,10 +88,14 @@ function updateHeroAi(hero: Hero, tCurr: number) {
         case "gather-resource":
             updateHeroGatherResource(hero, hero.job)
             break
+
+        case "controlled":
+            updateHeroControlled(hero, hero.job)
+            break
     }
 }
 
-function heroStateEnter(hero: Hero) {
+function heroStateEnterDefault(hero: Hero) {
     switch (hero.state) {
         case "idle":
             hero.actionEnd = 9999999
@@ -140,20 +155,27 @@ function heroStateEnter(hero: Hero) {
             break
         }
     }
+
+    if (hero === getSelectedHero()) {
+        updateActionUI()
+    }
 }
 
-function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
+function heroStateEnterControlled(hero: Hero) {
     switch (hero.state) {
-        case "station": {
-            if (hero.inventory.spaceUsed) {
-                transitionState(hero, "sell")
-                return
-            }
-
-            transitionState(hero, "exit")
+        case "station":
+            openPopup("settlement-popup", () => {
+                transitionState(hero, "exit")
+            })
+            hero.actionEnd = Number.MAX_SAFE_INTEGER
             return
-        }
+    }
 
+    heroStateEnterDefault(hero)
+}
+
+function updateHeroDefault(hero: Hero) {
+    switch (hero.state) {
         case "move-to-target":
             hero.gridX = hero.targetGridX
             hero.gridY = hero.targetGridY
@@ -177,9 +199,43 @@ function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
             transitionState(hero, "station")
             break
 
+        case "gather-resource": {
+            const resource = getResourceAt(hero.gridX, hero.gridY)
+            if (!resource) {
+                transitionState(hero, "idle")
+                return
+            }
+
+            resource.targetedBy = -1
+            gatherResource(hero, resource)
+
+            if (hero.inventory.spaceUsed < hero.inventory.spaceMax && resource.amount) {
+                hero.actionEnd += 2000
+                resource.targetedBy = hero.id
+                return
+            }
+
+            transitionState(hero, "idle")
+            return
+        }
+    }
+}
+
+function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
+    switch (hero.state) {
+        case "station": {
+            if (hero.inventory.spaceUsed) {
+                transitionState(hero, "sell")
+                return
+            }
+
+            transitionState(hero, "exit")
+            return
+        }
+
         case "exit":
             transitionState(hero, "search-resource")
-            break
+            return
 
         case "search-resource": {
             const resource = findClosestResource(hero.gridX, hero.gridY, job.itemId)
@@ -193,8 +249,8 @@ function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
             }
 
             resource.targetedBy = hero.id
-            transitionStateTarget(hero, resource)
-            break
+            transitionStateTarget(hero, resource.gridX, resource.gridY)
+            return
         }
 
         case "gather-resource": {
@@ -205,7 +261,7 @@ function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
             }
 
             resource.targetedBy = -1
-            extractResource(hero, resource)
+            gatherResource(hero, resource)
 
             if (hero.inventory.spaceUsed >= hero.inventory.spaceMax) {
                 transitionState(hero, "return-town")
@@ -228,8 +284,8 @@ function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
                 return
             }
 
-            transitionStateTarget(hero, town)
-            break
+            transitionStateTarget(hero, town.gridX, town.gridY)
+            return
         }
 
         case "sell": {
@@ -237,9 +293,15 @@ function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
             hero.inventory.spaceUsed = 0
 
             transitionState(hero, hero.statePrev)
-            break
+            return
         }
     }
+
+    updateHeroDefault(hero)
+}
+
+function updateHeroControlled(hero: Hero, _job: ControlledJob) {
+    updateHeroDefault(hero)
 }
 
 function transitionState(hero: Hero, stateNew: AiState) {
@@ -250,18 +312,38 @@ function transitionState(hero: Hero, stateNew: AiState) {
     hero.statePrev = hero.state
     hero.state = stateNew
 
-    heroStateEnter(hero)
+    if (!hero.job) {
+        return
+    }
+
+    switch (hero.job.type) {
+        case "controlled":
+            heroStateEnterControlled(hero)
+            break
+
+        default:
+            heroStateEnterDefault(hero)
+            break
+    }
 }
 
-function transitionStateTarget(hero: Hero, target: Entity) {
+export function transitionStateTarget(hero: Hero, targetGridX: number, targetGridY: number) {
     const { time } = getState()
+
+    if (hero.state === "move-to-target") {
+        const t = (time.curr - hero.actionStart) / (hero.actionEnd - hero.actionStart)
+        if (t < 1) {
+            hero.gridX = hero.gridX + (hero.targetGridX - hero.gridX) * t
+            hero.gridY = hero.gridY + (hero.targetGridY - hero.gridY) * t
+        }
+    }
 
     hero.actionStart = time.curr
     hero.actionEnd = time.curr
     hero.statePrev = hero.state
     hero.state = "move-to-target"
-    hero.targetGridX = target.gridX
-    hero.targetGridY = target.gridY
+    hero.targetGridX = targetGridX
+    hero.targetGridY = targetGridY
 
-    heroStateEnter(hero)
+    heroStateEnterDefault(hero)
 }
