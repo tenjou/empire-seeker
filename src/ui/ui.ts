@@ -1,5 +1,7 @@
+import { Entity } from "../entities/entity"
+import { getHoverEntity } from "../input"
 import { loadPopups } from "../popup"
-import { loadTooltip } from "../tooltip/tooltip"
+import { loadTooltip, updateEntityTooltip, updateTooltipContent } from "../tooltip/tooltip"
 import { ActionView } from "./action-view"
 import { getElement } from "./dom"
 import { InfoView } from "./info-view"
@@ -21,6 +23,12 @@ export function loadUI() {
 
     const infoView = getElement<InfoView>("info-view")
     infoView.updateFaction()
+}
+
+export function updateHover(entity: Entity) {
+    if (getHoverEntity() === entity) {
+        updateTooltipContent()
+    }
 }
 
 export function updateInventoryUI() {

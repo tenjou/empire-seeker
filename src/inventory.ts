@@ -1,5 +1,7 @@
 export type InventoryItemId = "wood" | "grain"
 
+export type InventoryItemType = "wood" | "food"
+
 export interface InventoryItem {
     itemId: InventoryItemId
     amount: number
@@ -9,6 +11,11 @@ export interface Inventory {
     items: InventoryItem[]
     spaceUsed: number
     spaceMax: number
+}
+
+export const InventoryItemMap: Record<InventoryItemId, InventoryItemType> = {
+    grain: "food",
+    wood: "wood",
 }
 
 export function addInventoryItem(inventory: Inventory, itemId: InventoryItemId, amountAdd: number) {
@@ -26,15 +33,8 @@ export function addInventoryItem(inventory: Inventory, itemId: InventoryItemId, 
     }
 
     inventory.spaceUsed += amount
-}
 
-export function transferInvnentory(inventorySrc: Inventory, inventoryTarget: Inventory) {
-    for (const item of inventorySrc.items) {
-        addInventoryItem(inventoryTarget, item.itemId, item.amount)
-    }
-
-    inventorySrc.items.length = 0
-    inventorySrc.spaceUsed = 0
+    return amount
 }
 
 export function haveInventorySpace(inventory: Inventory, amount: number) {

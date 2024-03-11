@@ -1,8 +1,9 @@
 import { FactionId } from "../factions/factions"
 import { Hero, HeroId, createHero } from "../hero/hero"
-import { Inventory, transferInvnentory } from "../inventory"
+import { Inventory, InventoryItemMap, addInventoryItem } from "../inventory"
 import { MapSize, placeEntity } from "../map"
 import { getState } from "../state"
+import { updateHover } from "../ui/ui"
 import { Entity, EntityType } from "./entity"
 
 interface TownSummary {
@@ -30,7 +31,7 @@ export function addTown(gridX: number, gridY: number, factionId: FactionId) {
         factionId,
         inventory: {
             items: [],
-            spaceMax: 100,
+            spaceMax: 1,
             spaceUsed: 0,
         },
         summary: {
@@ -50,11 +51,13 @@ function updateTown(town: Town) {
 
     for (const heroId of town.heroes) {
         const hero = heroes[heroId]
-        if (!hero.job) {
-            hero.job = {
-                type: "gather-resource",
-                itemId: "wood",
-            }
+        if (hero.job) {
+            continue
+        }
+
+        hero.job = {
+            type: "gather-resource",
+            itemId: "wood",
         }
     }
 }
@@ -74,9 +77,18 @@ export function updateTowns() {
 }
 
 export function transferInventoryToTown(hero: Hero, town: Town) {
-    transferInvnentory(hero.inventory, town.inventory)
+    const inventorySrc = hero.inventory
+    const inventoryTarget = town.inventory
 
-    console.log(town.inventory)
+    for (const item of inventorySrc.items) {
+        const amountAdded = addInventoryItem(inventoryTarget, item.itemId, item.amount)
+        town.summary[InventoryItemMap[item.itemId]] += amountAdded
+    }
+
+    inventorySrc.items.length = 0
+    inventorySrc.spaceUsed = 0
+
+    updateHover(town)
 }
 
 export function getTownAt(gridX: number, gridY: number) {
