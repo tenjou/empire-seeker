@@ -1,6 +1,6 @@
 import { FactionId } from "../factions/factions"
 import { Hero, HeroId, createHero } from "../hero/hero"
-import { Inventory } from "../inventory"
+import { Inventory, transferInvnentory } from "../inventory"
 import { MapSize, placeEntity } from "../map"
 import { getState } from "../state"
 import { Entity, EntityType } from "./entity"
@@ -71,6 +71,12 @@ export function updateTowns() {
     }
 
     time.townUpdate += 5000
+}
+
+export function transferInventoryToTown(hero: Hero, town: Town) {
+    transferInvnentory(hero.inventory, town.inventory)
+
+    console.log(town.inventory)
 }
 
 export function getTownAt(gridX: number, gridY: number) {

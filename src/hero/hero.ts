@@ -1,6 +1,6 @@
 import { EntityType, getEntityTypeAt } from "../entities/entity"
 import { findClosestResource, gatherResource, getResourceAt } from "../entities/resource"
-import { findClosestTown, getTownAt } from "../entities/town"
+import { findClosestTown, getTownAt, transferInventoryToTown } from "../entities/town"
 import { FactionId } from "../factions/factions"
 import { Inventory, InventoryItemId } from "../inventory"
 import { openPopup } from "../popup"
@@ -289,9 +289,13 @@ function updateHeroGatherResource(hero: Hero, job: GatherResourceJob) {
         }
 
         case "sell": {
-            hero.inventory.items.length = 0
-            hero.inventory.spaceUsed = 0
+            const town = getTownAt(hero.targetGridX, hero.targetGridY)
+            if (!town) {
+                transitionState(hero, "idle")
+                return
+            }
 
+            transferInventoryToTown(hero, town)
             transitionState(hero, hero.statePrev)
             return
         }

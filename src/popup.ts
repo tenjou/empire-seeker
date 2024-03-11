@@ -50,7 +50,6 @@ export function openPopup(tag: string, callback: PopupCallback | null = null) {
 
 export function closeLastPopup() {
     if (!popups.length) {
-        console.error(`No popups opened`)
         return
     }
 
