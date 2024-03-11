@@ -1,4 +1,12 @@
+type PopupCallback = () => void
+
+interface Popup {
+    element: HTMLElement
+    callback: PopupCallback | null
+}
+
 let popupsElement: HTMLElement = {} as HTMLElement
+let popups: Popup[] = []
 
 function stopPropagation(event: MouseEvent) {
     event.stopPropagation()
@@ -11,46 +19,51 @@ export function loadPopups() {
     popupsElement.onmousemove = stopPropagation
     popupsElement.onclick = (event) => {
         event.stopPropagation()
-        tryCloseCurrentPopup()
+        closeLastPopup()
     }
 
     window.addEventListener("keyup", (event) => {
         switch (event.key) {
             case "Escape":
-                tryCloseCurrentPopup()
+                closeLastPopup()
                 break
         }
     })
 }
 
-let currCb: () => void = () => {}
-
-export function openPopup(tag: string, cb: () => void) {
+export function openPopup(tag: string, callback: PopupCallback | null = null) {
     const popupsElement = document.getElementById("popups")!
-
-    const popup = document.createElement(tag)
-    popup.onclick = stopPropagation
-    popupsElement.appendChild(popup)
-
-    if (popupsElement.children.length === 1) {
+    if (popupsElement.children.length === 0) {
         popupsElement.classList.remove("hide")
+    } else {
+        popupsElement.removeChild(popupsElement.children[0])
     }
 
-    currCb = cb
+    const popupElement = document.createElement(tag)
+    popupElement.onclick = stopPropagation
+    popupsElement.appendChild(popupElement)
+    popups.push({
+        element: popupElement,
+        callback,
+    })
 }
 
-export function tryCloseCurrentPopup() {
-    const popups = popupsElement.children
-    if (popups.length <= 0) {
+export function closeLastPopup() {
+    if (!popups.length) {
+        console.error(`No popups opened`)
         return
     }
 
-    const currPopup = popups[popups.length - 1]
-    popupsElement.removeChild(currPopup)
+    const lastPopup = popups.pop()!
+    popupsElement.removeChild(lastPopup.element)
+    if (lastPopup.callback) {
+        lastPopup.callback()
+    }
 
-    currCb()
-
-    if (popups.length <= 0) {
+    if (popups.length) {
+        const prevPopup = popups[popups.length - 1]
+        popupsElement.appendChild(prevPopup.element)
+    } else {
         popupsElement.classList.add("hide")
     }
 }

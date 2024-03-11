@@ -73,7 +73,7 @@ function load() {
         data: new Int32Array(MapSize * MapSize),
         factions: [],
         ecology: {
-            treesToSpawn: 100,
+            treesToSpawn: 400,
         },
         time: {
             curr: 0,

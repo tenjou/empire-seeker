@@ -2,7 +2,7 @@ import { Entity, EntityType } from "./entities/entity"
 import { getState } from "./state"
 
 export const GridSize = 16
-export const MapSize = 100
+export const MapSize = 200
 export const MapWidth = MapSize * GridSize
 export const MapHeight = MapSize * GridSize
 
