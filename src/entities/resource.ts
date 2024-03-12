@@ -1,6 +1,5 @@
 import { ItemId } from "../configs/item-configs"
 import { Hero, HeroId } from "../hero/hero"
-import { getSelectedHero } from "../hero/hero-controller"
 import { getHoverEntity } from "../input"
 import { addInventoryItem } from "../inventory"
 import { MapSize, clearEntity, placeEntity } from "../map"

@@ -1,4 +1,4 @@
-import { EventId, subscribe } from "../events"
+import { EventId, unwatch, watch } from "../events"
 
 export function getElementById(id: string, parent?: Element) {
     const element = parent ? parent.querySelector(`#${id}`) : document.getElementById(id)
@@ -160,7 +160,7 @@ export class HTMLComponent extends HTMLElement {
         }
 
         if (this.eventId) {
-            subscribe(this.eventId, null)
+            unwatch(this.eventId)
         }
     }
 
@@ -220,14 +220,6 @@ export class HTMLComponent extends HTMLElement {
     }
 
     toggleClass(query: string, className: string, add: boolean) {
-        if (add) {
-            this.getElement(query).classList.add(className)
-        } else {
-            this.getElement(query).classList.remove(className)
-        }
-    }
-
-    toggleClassName(query: string = "", className: string, add: boolean) {
         if (add) {
             this.getElement(query).classList.add(className)
         } else {
@@ -316,6 +308,6 @@ export class HTMLComponent extends HTMLElement {
 
     subscribe(eventId: EventId, cb: () => void) {
         this.eventId = eventId
-        subscribe(eventId, cb)
+        watch(eventId, cb)
     }
 }

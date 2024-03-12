@@ -213,14 +213,17 @@ canvas {
     transform: translateY(1px);
 }
 .button-white {
-    border: 1px solid white;
-    color: white;
+    border: 1px solid #c5c5c5;
+    color: #c5c5c5;
+}
+.button-white:hover {
+    border: 1px solid #fff;
+    color: #fff;
 }
 
 .category {
     background: #00000052;
     padding: 0.25rem 0.5rem;
-    margin-bottom: 0.25rem;
     font-size: 11px;
     color: #ccc;
     text-transform: uppercase;

@@ -1,5 +1,4 @@
 import { ItemConfigs, ItemId } from "../configs/item-configs"
-import { emit } from "../events"
 import { FactionId } from "../factions/factions"
 import { Hero, HeroId, createHero } from "../hero/hero"
 import { Inventory, InventoryItemMap, addInventoryItem } from "../inventory"
@@ -106,12 +105,7 @@ export function transferInventoryToTown(hero: Hero, town: Town) {
     updateTradingUI(town)
 }
 
-export function getItemPrice(town: Town, itemId: ItemId) {
-    const item = town.inventory.items.find((entry) => entry.itemId === itemId)
-    if (!item) {
-        return 0
-    }
-
+export function getItemPrice(_town: Town, itemId: ItemId) {
     const itemCfg = ItemConfigs[itemId]
     return itemCfg.cost
 }

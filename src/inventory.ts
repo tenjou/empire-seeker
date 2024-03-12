@@ -47,6 +47,8 @@ export function removeInventoryItem(inventory: Inventory, itemId: ItemId, amount
     const amount = amountRemove > item.amount ? item.amount : amountRemove
     item.amount -= amount
 
+    inventory.spaceUsed -= amount
+
     if (item.amount <= 0) {
         inventory.items.splice(index, 1)
     }
