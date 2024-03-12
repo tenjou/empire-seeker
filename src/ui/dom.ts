@@ -1,3 +1,5 @@
+import { EventId, subscribe } from "../events"
+
 export function getElementById(id: string, parent?: Element) {
     const element = parent ? parent.querySelector(`#${id}`) : document.getElementById(id)
     if (!element) {
@@ -122,6 +124,7 @@ export class HTMLComponent extends HTMLElement {
     rootClasses: string
     timer?: number
     timeout?: number
+    eventId?: EventId
 
     constructor(template?: HTMLTemplateElement) {
         super()
@@ -154,6 +157,10 @@ export class HTMLComponent extends HTMLElement {
         }
         if (this.timeout) {
             clearInterval(this.timeout)
+        }
+
+        if (this.eventId) {
+            subscribe(this.eventId, null)
         }
     }
 
@@ -305,5 +312,10 @@ export class HTMLComponent extends HTMLElement {
         }
 
         return container
+    }
+
+    subscribe(eventId: EventId, cb: () => void) {
+        this.eventId = eventId
+        subscribe(eventId, cb)
     }
 }

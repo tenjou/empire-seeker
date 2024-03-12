@@ -71,7 +71,18 @@ canvas {
 .align-center {
     align-items: center;
 }
+.flex-1 {
+    flex: 1;
+}
 
+.z-top {
+    z-index: 99999;
+}
+
+.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
 .hide {
     display: none !important;
 }
@@ -90,6 +101,9 @@ canvas {
 .color-gray {
     color: #ccc;
 }
+.color-red {
+    color: red;
+}
 
 .font-smaller {
     font-size: 0.9rem;
@@ -105,6 +119,10 @@ canvas {
 
 .p-2 {
     padding: 0.5rem;
+}
+.px-1 {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
 }
 .px-2 {
     padding-left: 0.5rem;
@@ -124,8 +142,19 @@ canvas {
 .m-2 {
     margin: 0.5rem;
 }
+.my-1 {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+.my-2 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
 .mb-1 {
     margin-bottom: 0.25rem;
+}
+.mb-2 {
+    margin-bottom: 0.5rem;
 }
 .ml-1 {
     margin-left: 0.25rem;
@@ -188,6 +217,16 @@ canvas {
     color: white;
 }
 
+.category {
+    background: #00000052;
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.25rem;
+    font-size: 11px;
+    color: #ccc;
+    text-transform: uppercase;
+    border-radius: 3px;
+}
+
 #popups {
     background: #00000057;
 }
@@ -195,9 +234,9 @@ canvas {
     position: absolute;
     display: flex;
     flex-direction: column;
-    width: 300px;
+    width: 360px;
     padding: 0.5rem;
-    background-color: rgba(0, 0, 0, 0.8);
-    border-radius: 3px;
+    background-color: #333;
+    border-radius: 4px;
     color: white;
 }

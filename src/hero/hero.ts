@@ -1,8 +1,9 @@
+import { ItemId } from "../configs/item-configs"
 import { EntityType, getEntityTypeAt } from "../entities/entity"
 import { findClosestResource, gatherResource, getResourceAt } from "../entities/resource"
-import { findClosestTown, getTownAt, transferInventoryToTown } from "../entities/town"
+import { findClosestTown, getTownAt, selectTown, transferInventoryToTown } from "../entities/town"
 import { FactionId } from "../factions/factions"
-import { Inventory, InventoryItemId } from "../inventory"
+import { Inventory } from "../inventory"
 import { openPopup } from "../popup"
 import { addSprite, removeSprite } from "../renderer"
 import { getState } from "../state"
@@ -18,7 +19,7 @@ interface ControlledJob {
 
 interface GatherResourceJob {
     type: "gather-resource"
-    itemId: InventoryItemId
+    itemId: ItemId
 }
 
 type Job = ControlledJob | GatherResourceJob
@@ -164,10 +165,19 @@ function heroStateEnterDefault(hero: Hero) {
 function heroStateEnterControlled(hero: Hero) {
     switch (hero.state) {
         case "station":
+            const town = getTownAt(hero.gridX, hero.gridY)
+            if (!town) {
+                transitionState(hero, "idle")
+                return
+            }
+
+            hero.actionEnd = Number.MAX_SAFE_INTEGER
+
+            selectTown(town)
             openPopup("settlement-popup", () => {
+                selectTown(null)
                 transitionState(hero, "exit")
             })
-            hero.actionEnd = Number.MAX_SAFE_INTEGER
             return
     }
 

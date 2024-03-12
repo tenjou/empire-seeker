@@ -1,7 +1,8 @@
+import { ItemId } from "../configs/item-configs"
 import { Hero, HeroId } from "../hero/hero"
 import { getSelectedHero } from "../hero/hero-controller"
 import { getHoverEntity } from "../input"
-import { InventoryItemId, addInventoryItem } from "../inventory"
+import { addInventoryItem } from "../inventory"
 import { MapSize, clearEntity, placeEntity } from "../map"
 import { getState } from "../state"
 import { updateEntityTooltip, updateTooltipContent } from "../tooltip/tooltip"
@@ -10,7 +11,7 @@ import { randomNumber } from "../utils"
 import { Entity, EntityType } from "./entity"
 
 export interface Resource extends Entity {
-    itemId: InventoryItemId
+    itemId: ItemId
     amount: number
     targetedBy: HeroId
 }
@@ -38,9 +39,7 @@ export function gatherResource(hero: Hero, resource: Resource) {
         }
     }
 
-    if (getSelectedHero() === hero) {
-        updateInventoryUI()
-    }
+    updateInventoryUI(hero)
 }
 
 export function addTree(gridX: number, gridY: number) {
@@ -90,7 +89,7 @@ export function getResourceAt(gridX: number, gridY: number) {
     return entity || null
 }
 
-export function findClosestResource(gridX: number, gridY: number, itemId: InventoryItemId) {
+export function findClosestResource(gridX: number, gridY: number, itemId: ItemId) {
     const { resources } = getState()
 
     let closestResource: Resource | null = null

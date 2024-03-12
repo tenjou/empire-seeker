@@ -2,7 +2,7 @@ import { getState } from "../state"
 import { HTMLComponent } from "./dom"
 
 const template = document.createElement("template")
-template.className = "absolute right top p-2 flex bg-light border-bottom-left-radius"
+template.className = "absolute right top p-2 flex bg-light border-bottom-left-radius z-top"
 template.innerHTML = html`
     <div class="flex width-100px">
         <img class="mr-1" src="/icons/gold.png" />
@@ -14,6 +14,12 @@ template.innerHTML = html`
 export class InfoView extends HTMLComponent {
     constructor() {
         super(template)
+    }
+
+    connectedCallback(): void {
+        super.connectedCallback()
+
+        this.updateFaction()
     }
 
     updateFaction() {

@@ -1,8 +1,11 @@
+import { ItemConfigs, ItemId } from "../configs/item-configs"
+import { emit } from "../events"
 import { FactionId } from "../factions/factions"
 import { Hero, HeroId, createHero } from "../hero/hero"
 import { Inventory, InventoryItemMap, addInventoryItem } from "../inventory"
 import { MapSize, placeEntity } from "../map"
 import { getState } from "../state"
+import { updateTradingUI } from "../trading/town-trading"
 import { updateHover } from "../ui/ui"
 import { Entity, EntityType } from "./entity"
 
@@ -18,6 +21,8 @@ export interface Town extends Entity {
     heroes: HeroId[]
 }
 
+let selectedTown: Town | null = null
+
 export function addTown(gridX: number, gridY: number, factionId: FactionId) {
     const { towns } = getState()
 
@@ -30,8 +35,17 @@ export function addTown(gridX: number, gridY: number, factionId: FactionId) {
         gridY,
         factionId,
         inventory: {
-            items: [],
-            spaceMax: 1,
+            items: [
+                {
+                    itemId: "wood",
+                    amount: 3,
+                },
+                {
+                    itemId: "grain",
+                    amount: 1,
+                },
+            ],
+            spaceMax: 20,
             spaceUsed: 0,
         },
         summary: {
@@ -89,6 +103,17 @@ export function transferInventoryToTown(hero: Hero, town: Town) {
     inventorySrc.spaceUsed = 0
 
     updateHover(town)
+    updateTradingUI(town)
+}
+
+export function getItemPrice(town: Town, itemId: ItemId) {
+    const item = town.inventory.items.find((entry) => entry.itemId === itemId)
+    if (!item) {
+        return 0
+    }
+
+    const itemCfg = ItemConfigs[itemId]
+    return itemCfg.cost
 }
 
 export function getTownAt(gridX: number, gridY: number) {
@@ -130,4 +155,12 @@ export function findClosestTown(hero: Hero) {
     }
 
     return closestTown
+}
+
+export function selectTown(town: Town | null) {
+    selectedTown = town
+}
+
+export function getSelectedTown() {
+    return selectedTown
 }
